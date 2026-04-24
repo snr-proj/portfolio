@@ -114,22 +114,14 @@ if (window.matchMedia('(pointer: fine)').matches) {
   animateGlow();
 }
 
+
 /* --- CONTACT FORM --- */
 const form = document.getElementById('contactForm');
 if (form) {
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
+  form.addEventListener('submit', () => {
     const btn = form.querySelector('button[type="submit"]');
-    const original = btn.textContent;
-    btn.textContent = '✦ Message Sent!';
-    btn.style.background = 'linear-gradient(135deg, #b5e8c8, #5cc88c)';
+    btn.textContent = 'Sending... ✦';
     btn.disabled = true;
-    setTimeout(() => {
-      btn.textContent = original;
-      btn.style.background = '';
-      btn.disabled = false;
-      form.reset();
-    }, 3000);
   });
 }
 
