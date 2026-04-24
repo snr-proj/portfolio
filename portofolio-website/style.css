@@ -628,67 +628,241 @@ body.loaded .btn-primary { animation: btnPulse 2.8s ease-in-out infinite 2s; }
 }
 
 /* ============================================================
-   SKILLS
+   SKILLS — BOOK STYLE
    ============================================================ */
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-}
-
-.skill-card {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(242,143,171,0.18);
-  border-radius: 20px;
-  padding: 2rem 1.5rem;
-  transition: var(--transition);
-  position: relative;
+.book-wrapper {
+  display: flex;
+  align-items: stretch;
+  background: var(--white);
+  border-radius: 4px 20px 20px 4px;
+  box-shadow:
+    -6px 0 0 0 rgba(200, 196, 192, 0.4),
+    0 20px 60px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(242, 143, 171, 0.1);
   overflow: hidden;
+  min-height: 520px;
 }
 
-.skill-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--pink-rose), transparent);
-  opacity: 0;
-  transition: opacity var(--transition);
+/* Individual pages */
+.book-page {
+  flex: 1;
+  padding: 3rem 2.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background: var(--white);
+  position: relative;
 }
 
-.skill-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(242,143,171,0.45);
-  box-shadow: 0 16px 48px rgba(242,143,171,0.18), 0 4px 16px rgba(0,0,0,0.04);
+/* Subtle aged paper texture on left page */
+.book-page-left {
+  background: linear-gradient(160deg, #FFFDF9 0%, #FAF7F2 100%);
+  border-right: none;
 }
 
-.skill-card:hover::before { opacity: 1; }
-.skill-icon { font-size: 1.8rem; margin-bottom: 1rem; display: block; }
+.book-page-right {
+  background: linear-gradient(160deg, #FAF7F2 0%, #FFFDF9 100%);
+}
 
-.skill-card h3 {
+/* Page header with roman numeral */
+.book-page-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.book-page-num {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--pink-deep);
+  letter-spacing: 0.12em;
+  flex-shrink: 0;
+}
+
+.book-page-rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--pink-blush), rgba(200, 196, 192, 0.3));
+}
+
+.book-page-right .book-page-header .book-page-rule {
+  background: linear-gradient(90deg, rgba(200, 196, 192, 0.3), var(--pink-blush));
+}
+
+/* Chapter block */
+.book-chapter { display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
+
+.book-chapter-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--pink-rose);
+  font-weight: 400;
+}
+
+.book-chapter-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
   font-weight: 400;
   color: var(--charcoal);
-  margin-bottom: 0.8rem;
+  line-height: 1.2;
+  margin-bottom: 0.2rem;
 }
 
-.skill-card ul { display: flex; flex-direction: column; gap: 0.4rem; }
-
-.skill-card li {
-  font-size: 0.85rem;
+.book-chapter-sub {
+  font-size: 0.8rem;
   color: var(--gray-mid);
   font-weight: 300;
-  padding-left: 0.8rem;
+  font-style: italic;
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+}
+
+/* Skill list */
+.book-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.book-list li {
+  font-size: 0.9rem;
+  color: var(--gray-dark);
+  font-weight: 300;
+  line-height: 1.5;
+  padding-left: 1.1rem;
   position: relative;
 }
 
-.skill-card li::before {
-  content: '·';
+.book-list li::before {
+  content: '—';
   position: absolute;
   left: 0;
   color: var(--pink-rose);
+  font-size: 0.75rem;
+  top: 0.15rem;
+}
+
+/* Two-column list for tools */
+.book-list-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem 1rem;
+}
+
+/* Page footer */
+.book-page-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.book-page-footer-right { justify-content: flex-end; }
+
+.book-footer-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--pink-blush), rgba(200, 196, 192, 0.2));
+}
+
+.book-page-footer-right .book-footer-line {
+  background: linear-gradient(90deg, rgba(200, 196, 192, 0.2), var(--pink-blush));
+}
+
+.book-footer-diamond {
+  font-size: 0.6rem;
+  color: var(--pink-rose);
+  opacity: 0.6;
+}
+
+/* Book spine */
+.book-spine {
+  width: 36px;
+  background: linear-gradient(to bottom, var(--charcoal) 0%, #2e2e2e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.book-spine::before,
+.book-spine::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: rgba(242, 143, 171, 0.3);
+}
+
+.book-spine::before { top: 2rem; }
+.book-spine::after { bottom: 2rem; }
+
+.book-spine-text {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+
+/* Closing quote */
+.book-closing {
+  margin-top: auto;
+  padding: 1.4rem 1.4rem;
+  background: linear-gradient(135deg, rgba(249, 184, 200, 0.12), rgba(242, 143, 171, 0.06));
+  border-left: 2px solid var(--pink-rose);
+  border-radius: 0 10px 10px 0;
+}
+
+.book-closing-quote {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--gray-dark);
+  line-height: 1.7;
+  margin-bottom: 0.6rem;
+}
+
+.book-closing-sig {
+  font-size: 0.75rem;
+  color: var(--pink-deep);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .book-wrapper {
+    flex-direction: column;
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(242, 143, 171, 0.1);
+  }
+
+  .book-spine {
+    width: 100%;
+    height: 32px;
+    writing-mode: horizontal-tb;
+  }
+
+  .book-spine-text {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+
+  .book-spine::before { top: 0; bottom: auto; left: 2rem; right: auto; width: 1px; height: 100%; }
+  .book-spine::after { bottom: 0; top: auto; right: 2rem; left: auto; width: 1px; height: 100%; }
+
+  .book-page { padding: 2rem 1.5rem; }
+  .book-list-two-col { grid-template-columns: 1fr; }
 }
 
 /* ============================================================
@@ -970,19 +1144,19 @@ body.loaded .btn-primary { animation: btnPulse 2.8s ease-in-out infinite 2s; }
 
 .contact-grid {
   display: grid;
-  grid-template-columns: 1fr 1.5fr;
+  grid-template-columns: 1fr 1.6fr;
   gap: 5rem;
   align-items: start;
 }
 
-.contact-info { display: flex; flex-direction: column; gap: 2rem; }
+.contact-info { display: flex; flex-direction: column; gap: 2.5rem; }
 .contact-item { display: flex; align-items: flex-start; gap: 1rem; }
 
 .contact-icon {
   font-size: 1.1rem;
-  width: 36px; height: 36px;
+  width: 40px; height: 40px;
   background: linear-gradient(135deg, rgba(249,184,200,0.3), rgba(242,143,171,0.2));
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -995,7 +1169,7 @@ body.loaded .btn-primary { animation: btnPulse 2.8s ease-in-out infinite 2s; }
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--gray-mid);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.3rem;
 }
 
 .contact-value {
@@ -1003,10 +1177,37 @@ body.loaded .btn-primary { animation: btnPulse 2.8s ease-in-out infinite 2s; }
   color: var(--charcoal);
   font-weight: 400;
   transition: color var(--transition);
+  display: inline-block;
 }
 
 .contact-value:hover { color: var(--pink-deep); }
 
+/* Hover label that slides up */
+.contact-hoverable {
+  position: relative;
+}
+
+.contact-hoverable::after {
+  content: attr(data-hover);
+  position: absolute;
+  bottom: -1.4rem;
+  left: 0;
+  font-size: 0.7rem;
+  color: var(--pink-deep);
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--transition), transform var(--transition);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.contact-hoverable:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Form */
 .contact-form { display: flex; flex-direction: column; gap: 1.5rem; }
 .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
 
@@ -1042,6 +1243,8 @@ body.loaded .btn-primary { animation: btnPulse 2.8s ease-in-out infinite 2s; }
   border-color: var(--pink-rose);
   box-shadow: 0 0 0 4px rgba(242,143,171,0.12);
 }
+
+.full-width-btn { width: 100%; }
 
 /* ============================================================
    FOOTER

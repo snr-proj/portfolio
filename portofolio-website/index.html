@@ -191,45 +191,91 @@
   <!-- SKILLS -->
   <section id="skills" class="section section-alt">
     <div class="container">
-      <div class="section-label reveal">What I Know</div>
-      <h2 class="section-title reveal">Skills <em>&amp; Tech Stack</em></h2>
-      <div class="skills-grid reveal">
-        <div class="skill-card">
-          <div class="skill-icon">⌨️</div>
-          <h3>Frontend</h3>
-          <ul>
-            <li>HTML5 &amp; CSS3</li>
-            <li>JavaScript (ES6+)</li>
-            <li>Responsive Design</li>
-          </ul>
+      <div class="section-label reveal">What I Bring</div>
+      <h2 class="section-title reveal">Skills <em>&amp; Proficiencies</em></h2>
+
+      <div class="book-wrapper reveal">
+
+        <!-- Left page -->
+        <div class="book-page book-page-left">
+          <div class="book-page-header">
+            <span class="book-page-num">I</span>
+            <span class="book-page-rule"></span>
+          </div>
+
+          <div class="book-chapter">
+            <p class="book-chapter-label">Chapter One</p>
+            <h3 class="book-chapter-title">Project Management</h3>
+            <p class="book-chapter-sub">Where I thrive most.</p>
+            <ul class="book-list">
+              <li>Agile &amp; Waterfall Methodology</li>
+              <li>Task Coordination</li>
+              <li>Team Collaboration</li>
+              <li>Client Communication</li>
+              <li>Requirements Gathering</li>
+              <li>Project Documentation</li>
+              <li>End-to-End Project Delivery</li>
+            </ul>
+          </div>
+
+          <div class="book-chapter">
+            <p class="book-chapter-label">Chapter Two</p>
+            <h3 class="book-chapter-title">Technical Proficiency</h3>
+            <p class="book-chapter-sub">Working knowledge, not development-level — but enough to bridge the gap.</p>
+            <ul class="book-list">
+              <li>HTML &amp; CSS</li>
+              <li>SQL &amp; MS Database</li>
+              <li>Basic UI/UX Principles</li>
+            </ul>
+          </div>
+
+          <div class="book-page-footer">
+            <span class="book-footer-line"></span>
+            <span class="book-footer-diamond">✦</span>
+          </div>
         </div>
-        <div class="skill-card">
-          <div class="skill-icon">🗂️</div>
-          <h3>Project Management</h3>
-          <ul>
-            <li>Task Coordination</li>
-            <li>Team Collaboration</li>
-            <li>Agile Basics</li>
-          </ul>
+
+        <!-- Spine -->
+        <div class="book-spine">
+          <span class="book-spine-text">Skills &amp; Proficiencies</span>
         </div>
-        <div class="skill-card">
-          <div class="skill-icon">🎨</div>
-          <h3>Design</h3>
-          <ul>
-            <li>UI/UX Principles</li>
-            <li>Figma</li>
-            <li>Color Theory</li>
-          </ul>
+
+        <!-- Right page -->
+        <div class="book-page book-page-right">
+          <div class="book-page-header">
+            <span class="book-page-rule"></span>
+            <span class="book-page-num">II</span>
+          </div>
+
+          <div class="book-chapter">
+            <p class="book-chapter-label">Chapter Three</p>
+            <h3 class="book-chapter-title">Tools &amp; Platforms</h3>
+            <p class="book-chapter-sub">My everyday toolkit.</p>
+            <ul class="book-list book-list-two-col">
+              <li>Google Workspace</li>
+              <li>Office 365</li>
+              <li>MS Project</li>
+              <li>MS Database</li>
+              <li>Jira</li>
+              <li>Slack</li>
+              <li>Notion</li>
+              <li>Figma</li>
+              <li>VS Code</li>
+              <li>Git &amp; GitHub</li>
+            </ul>
+          </div>
+
+          <div class="book-closing">
+            <p class="book-closing-quote">"Always eager to learn, improve workflows, and contribute to meaningful projects."</p>
+            <span class="book-closing-sig">— Shaira Nicole Ramos</span>
+          </div>
+
+          <div class="book-page-footer book-page-footer-right">
+            <span class="book-footer-diamond">✦</span>
+            <span class="book-footer-line"></span>
+          </div>
         </div>
-        <div class="skill-card">
-          <div class="skill-icon">🛠️</div>
-          <h3>Tools</h3>
-          <ul>
-            <li>VS Code</li>
-            <li>Git &amp; GitHub</li>
-            <li>Google Workspace</li>
-          </ul>
-        </div>
+
       </div>
     </div>
   </section>
@@ -543,38 +589,38 @@
             <span class="contact-icon">✉</span>
             <div>
               <p class="contact-label">Email</p>
-              <a href="mailto:shaira@email.com" class="contact-value">shaira@email.com</a>
+              <a href="mailto:shairanicoleramos30@gmail.com"
+                 class="contact-value contact-hoverable"
+                 data-hover="Message Me ✦">shairanicoleramos30@gmail.com</a>
             </div>
           </div>
           <div class="contact-item">
             <span class="contact-icon">🔗</span>
             <div>
               <p class="contact-label">LinkedIn</p>
-              <a href="#" class="contact-value">linkedin.com/in/shairaramos</a>
-            </div>
-          </div>
-          <div class="contact-item">
-            <span class="contact-icon">🐙</span>
-            <div>
-              <p class="contact-label">GitHub</p>
-              <a href="#" class="contact-value">github.com/shairaramos</a>
+              <a href="https://www.linkedin.com/in/shairanicole/"
+                 target="_blank"
+                 class="contact-value contact-hoverable"
+                 data-hover="Let's Connect ✦">linkedin.com/in/shairanicole</a>
             </div>
           </div>
         </div>
-        <form class="contact-form" id="contactForm">
+        <form class="contact-form" id="contactForm"
+              action="https://formspree.io/f/xaqaavvb"
+              method="POST">
           <div class="form-group">
             <label for="cname">Your Name</label>
-            <input type="text" id="cname" placeholder="Jane Doe" required />
+            <input type="text" id="cname" name="name" placeholder="Jane Doe" required />
           </div>
           <div class="form-group">
             <label for="cemail">Your Email</label>
-            <input type="email" id="cemail" placeholder="jane@email.com" required />
+            <input type="email" id="cemail" name="email" placeholder="jane@email.com" required />
           </div>
           <div class="form-group">
             <label for="message">Message</label>
-            <textarea id="message" rows="5" placeholder="Tell me what's on your mind..." required></textarea>
+            <textarea id="message" name="message" rows="5" placeholder="Tell me what's on your mind..." required></textarea>
           </div>
-          <button type="submit" class="btn-primary">Send Message ✦</button>
+          <button type="submit" class="btn-primary full-width-btn">Send Message ✦</button>
         </form>
       </div>
     </div>
