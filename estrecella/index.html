@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Estreccella</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- SETUP SCREEN (shown only on first visit) -->
+  <div id="setup-screen" class="setup-screen hidden">
+    <div class="setup-box">
+      <div class="setup-logo">✦</div>
+      <h1 class="setup-title">Estreccella</h1>
+      <p class="setup-sub">Your personal project workspace — let's get you set up.</p>
+      <input type="text" id="setup-name" class="setup-input" placeholder="Your name" maxlength="60"/>
+      <input type="text" id="setup-role" class="setup-input" placeholder="Your role (e.g. Project Manager)" maxlength="80"/>
+      <button class="setup-btn" id="setup-btn">Get Started →</button>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">✦</span>
+        <span class="logo-text">Estreccella</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item active"><span class="nav-icon">⊞</span> Dashboard</a>
+        <a href="pages/calendar.html" class="nav-item"><span class="nav-icon">◫</span> Calendar</a>
+        <a href="pages/projects.html" class="nav-item"><span class="nav-icon">◈</span> Projects & Timeline</a>
+        <a href="pages/sprint.html" class="nav-item"><span class="nav-icon">⚡</span> Sprint Board</a>
+        <a href="pages/meetings.html" class="nav-item"><span class="nav-icon">◎</span> Meetings</a>
+        <a href="pages/docs.html" class="nav-item"><span class="nav-icon">◻</span> Documents</a>
+      </nav>
+      <div class="sidebar-user">
+        <div class="user-avatar" id="user-avatar" title="Edit profile"></div>
+        <div class="user-info">
+          <div id="user-name" class="user-name">You</div>
+          <div id="user-email" class="user-email"></div>
+        </div>
+        <button id="reset-btn" class="logout-btn" title="Reset profile">↪</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-sub" id="greeting">Good morning — here's your week at a glance.</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Tasks</div></div>
+        <div class="stat-card"><div class="stat-num red" id="stat-overdue">0</div><div class="stat-label">Overdue</div></div>
+        <div class="stat-card"><div class="stat-num amber" id="stat-inprogress">0</div><div class="stat-label">In Progress</div></div>
+        <div class="stat-card"><div class="stat-num green" id="stat-done">0</div><div class="stat-label">Completed</div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><h2 class="section-title">Quick Add Task</h2></div>
+        <div class="quick-add">
+          <input type="text" id="task-title-input" class="input" placeholder="Task title..." />
+          <select id="task-priority" class="select">
+            <option value="1">🔴 P1 — Urgent</option>
+            <option value="2">🟠 P2 — High</option>
+            <option value="3" selected>🟡 P3 — Medium</option>
+            <option value="4">🟢 P4 — Low</option>
+            <option value="5">⚪ P5 — Someday</option>
+          </select>
+          <input type="number" id="task-hours" class="input small" placeholder="Hrs" min="0.5" step="0.5" value="1" />
+          <input type="date" id="task-due" class="input" />
+          <button id="add-task-btn" class="btn-primary">+ Add Task</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">All Tasks</h2>
+          <button id="auto-schedule-btn" class="btn-secondary">⚡ Auto-Schedule Week</button>
+        </div>
+        <div id="task-list" class="task-list">
+          <p class="empty-state">No tasks yet. Add one above!</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { db, profile, showToast, renderUser, openProfileModal } from "./js/db.js";
+
+    const WORK_HOURS = { 1:{start:8,end:17}, 2:{start:9,end:18}, 3:{start:9,end:18}, 4:{start:8,end:17}, 5:{start:9,end:18} };
+
+    // ── Init ──────────────────────────────────────────────────
+    function init() {
+      const p = profile.get();
+      if (!p) {
+        document.getElementById("setup-screen").classList.remove("hidden");
+      } else {
+        showApp();
+      }
+    }
+
+    function showApp() {
+      document.getElementById("setup-screen").classList.add("hidden");
+      document.getElementById("app").classList.remove("hidden");
+      const hour = new Date().getHours();
+      const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+      const p = profile.get();
+      document.getElementById("greeting").textContent = `${greet}, ${p?.name || ""}! Here's your week at a glance.`;
+      renderUser();
+      loadTasks();
+    }
+
+    // Setup
+    document.getElementById("setup-btn").onclick = () => {
+      const name = document.getElementById("setup-name").value.trim();
+      if (!name) { alert("Please enter your name"); return; }
+      profile.set({ name, role: document.getElementById("setup-role").value.trim() });
+      showApp();
+    };
+    document.getElementById("setup-name")?.addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("setup-btn").click(); });
+
+    // Reset / profile
+    document.getElementById("reset-btn").onclick = () => {
+      if (confirm("This will clear your profile (data stays). Continue?")) {
+        profile.clear();
+        window.location.reload();
+      }
+    };
+    document.getElementById("user-avatar").onclick = () => openProfileModal();
+
+    // ── Tasks ─────────────────────────────────────────────────
+    function loadTasks() {
+      const tasks = db.getAll("tasks").sort((a, b) => a.priority - b.priority);
+      renderTasks(tasks);
+      updateStats(tasks);
+    }
+
+    function renderTasks(tasks) {
+      const list = document.getElementById("task-list");
+      if (!tasks.length) { list.innerHTML = '<p class="empty-state">No tasks yet. Add one above!</p>'; return; }
+      const now = new Date();
+      list.innerHTML = tasks.map(t => {
+        const overdue = t.dueDate && new Date(t.dueDate) < now && t.status !== "done";
+        const done    = t.status === "done";
+        const dueStr  = t.dueDate ? new Date(t.dueDate).toLocaleDateString("en-PH", { month: "short", day: "numeric" }) : "";
+        const sched   = t.scheduledStart
+          ? `📅 ${new Date(t.scheduledStart).toLocaleString("en-PH", { weekday:"short", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" })}`
+          : "";
+        return `
+          <div class="task-item ${done ? "done" : ""}">
+            <div class="task-check ${done ? "checked" : ""}" onclick="toggleTask('${t.id}',${done})">${done ? "✓" : ""}</div>
+            <div class="task-name">${t.title}</div>
+            <div class="task-meta">
+              ${sched ? `<span class="task-scheduled">${sched}</span>` : ""}
+              <span class="priority-badge p${t.priority}">P${t.priority}</span>
+              ${dueStr ? `<span class="task-due ${overdue?"overdue":""}">${overdue?"⚠ ":""}${dueStr}</span>` : ""}
+              <span class="task-due">${t.estimatedHours||1}h</span>
+              <button class="btn-danger" onclick="deleteTask('${t.id}')">✕</button>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    function updateStats(tasks) {
+      const now = new Date();
+      document.getElementById("stat-total").textContent      = tasks.length;
+      document.getElementById("stat-overdue").textContent    = tasks.filter(t => t.dueDate && new Date(t.dueDate) < now && t.status !== "done").length;
+      document.getElementById("stat-inprogress").textContent = tasks.filter(t => t.status === "inprogress").length;
+      document.getElementById("stat-done").textContent       = tasks.filter(t => t.status === "done").length;
+    }
+
+    document.getElementById("add-task-btn").addEventListener("click", () => {
+      const title = document.getElementById("task-title-input").value.trim();
+      if (!title) { showToast("Please enter a task title"); return; }
+      db.add("tasks", {
+        title,
+        priority:       parseInt(document.getElementById("task-priority").value),
+        estimatedHours: parseFloat(document.getElementById("task-hours").value) || 1,
+        dueDate:        document.getElementById("task-due").value || null,
+        status:         "todo",
+        scheduledStart: null,
+        scheduledEnd:   null,
+      });
+      document.getElementById("task-title-input").value = "";
+      document.getElementById("task-hours").value = "1";
+      document.getElementById("task-due").value = "";
+      showToast("Task added!");
+      loadTasks();
+    });
+
+    window.toggleTask = (id, isDone) => {
+      db.update("tasks", id, { status: isDone ? "todo" : "done" });
+      loadTasks();
+    };
+
+    window.deleteTask = (id) => {
+      if (!confirm("Delete this task?")) return;
+      db.delete("tasks", id);
+      showToast("Deleted");
+      loadTasks();
+    };
+
+    // ── Auto-schedule ─────────────────────────────────────────
+    document.getElementById("auto-schedule-btn").addEventListener("click", () => {
+      const tasks = db.getAll("tasks", t => t.status !== "done").sort((a,b) => a.priority - b.priority);
+      const slots = buildWeekSlots();
+      let count = 0;
+      for (const t of tasks) {
+        const dur  = t.estimatedHours || 1;
+        const slot = findSlot(slots, dur);
+        if (slot) {
+          db.update("tasks", t.id, { scheduledStart: slot.start.toISOString(), scheduledEnd: slot.end.toISOString() });
+          occupySlot(slots, slot, dur);
+          count++;
+        }
+      }
+      showToast(`✓ Scheduled ${count} tasks for this week`);
+      loadTasks();
+    });
+
+    function getMonday(d) {
+      const day = d.getDay();
+      d.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    function buildWeekSlots() {
+      const slots = {};
+      const mon = getMonday(new Date());
+      for (let d = 0; d < 5; d++) {
+        const day = new Date(mon);
+        day.setDate(day.getDate() + d);
+        const dow = day.getDay();
+        if (WORK_HOURS[dow]) {
+          const key = day.toISOString().split("T")[0];
+          slots[key] = { date: day, startHour: WORK_HOURS[dow].start, availableHours: WORK_HOURS[dow].end - WORK_HOURS[dow].start, occupied: [] };
+        }
+      }
+      return slots;
+    }
+
+    function findSlot(slots, dur) {
+      for (const key of Object.keys(slots).sort()) {
+        const day  = slots[key];
+        const used = day.occupied.reduce((s, h) => s + h, 0);
+        if (day.availableHours - used >= dur) {
+          const start = new Date(day.date);
+          start.setHours(day.startHour + used, 0, 0, 0);
+          const end = new Date(start);
+          end.setHours(end.getHours() + Math.floor(dur));
+          end.setMinutes(end.getMinutes() + (dur % 1) * 60);
+          return { start, end, key };
+        }
+      }
+      return null;
+    }
+
+    function occupySlot(slots, slot, dur) { slots[slot.key].occupied.push(dur); }
+
+    init();
+  </script>
+</body>
+</html>

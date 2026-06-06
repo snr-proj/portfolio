@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meetings — Estreccella</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div id="app" class="app">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">✦</span><span class="logo-text">Estreccella</span></div>
+    <nav class="sidebar-nav">
+      <a href="../index.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="calendar.html" class="nav-item"><span class="nav-icon">◫</span> Calendar</a>
+      <a href="projects.html" class="nav-item"><span class="nav-icon">◈</span> Projects & Timeline</a>
+      <a href="sprint.html" class="nav-item"><span class="nav-icon">⚡</span> Sprint Board</a>
+      <a href="meetings.html" class="nav-item active"><span class="nav-icon">◎</span> Meetings</a>
+      <a href="docs.html" class="nav-item"><span class="nav-icon">◻</span> Documents</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="user-avatar" title="Edit profile"></div>
+      <div class="user-info"><div id="user-name" class="user-name">You</div><div id="user-email" class="user-email"></div></div>
+      <button class="logout-btn" onclick="window.location='../index.html'" title="Home">↩</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- LIST VIEW -->
+    <div id="list-view">
+      <div class="page-header">
+        <h1 class="page-title">Meetings</h1>
+        <p class="page-sub">Log meeting notes, action items, and attachments.</p>
+      </div>
+      <div style="margin-bottom:20px;">
+        <button class="btn-primary" id="new-meeting-btn">+ New Meeting</button>
+      </div>
+      <div id="meeting-list"><p class="empty-state">No meetings yet. Click "+ New Meeting" to start.</p></div>
+    </div>
+
+    <!-- EDITOR VIEW -->
+    <div id="editor-view" class="hidden">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <button class="btn-secondary" id="back-btn">← Back</button>
+        <h1 class="page-title" style="flex:1;" id="editor-heading">Meeting Notes</h1>
+        <button class="btn-danger" id="delete-meeting-btn">Delete</button>
+        <button class="btn-primary" id="save-meeting-btn">Save</button>
+      </div>
+
+      <div style="background:#fff;border:1px solid #E2E2E2;border-radius:12px;padding:24px;margin-bottom:20px;">
+        <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div><label class="label">Meeting title *</label><input type="text" id="m-title" class="input" style="width:100%;" placeholder="e.g. Sprint Planning"/></div>
+          <div><label class="label">Date & time</label><input type="datetime-local" id="m-date" class="input" style="width:100%;"/></div>
+        </div>
+        <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div><label class="label">Attendees</label><input type="text" id="m-attendees" class="input" style="width:100%;" placeholder="Names, comma separated"/></div>
+          <div><label class="label">Project (optional)</label><input type="text" id="m-project" class="input" style="width:100%;" placeholder="Project name"/></div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div style="background:#fff;border:1px solid #E2E2E2;border-radius:12px 12px 0 0;border-bottom:none;padding:8px 14px;display:flex;gap:4px;flex-wrap:wrap;">
+        <button onclick="fmt('bold')" class="tb-btn"><b>B</b></button>
+        <button onclick="fmt('italic')" class="tb-btn"><i>I</i></button>
+        <button onclick="fmt('underline')" class="tb-btn"><u>U</u></button>
+        <span style="width:1px;background:#E2E2E2;margin:0 6px;"></span>
+        <button onclick="insertHeading()" class="tb-btn">H2</button>
+        <button onclick="insertBullet()" class="tb-btn">• List</button>
+        <button onclick="insertTodo()" class="tb-btn">☐ Todo</button>
+        <button onclick="insertDivider()" class="tb-btn">—</button>
+        <span style="width:1px;background:#E2E2E2;margin:0 6px;"></span>
+        <button onclick="insertDate()" class="tb-btn">📅 Date</button>
+      </div>
+      <div id="m-notes" class="editor-area" contenteditable="true"
+        style="border-radius:0 0 12px 12px;"
+        placeholder="Start typing your meeting notes here...&#10;&#10;Tip: Use ☐ Todo buttons to add action items.">
+      </div>
+
+      <!-- Attachments (stored as downloadable links via blob URLs) -->
+      <div style="margin-top:20px;">
+        <label class="label">Attachments <span style="font-weight:400;color:#aaa;font-size:10px;">(stored locally in browser)</span></label>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap;">
+          <label class="btn-secondary" style="cursor:pointer;">
+            📎 Attach file
+            <input type="file" id="m-attach" multiple style="display:none;"/>
+          </label>
+          <div id="attach-list" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+      </div>
+
+      <!-- Action items -->
+      <div style="margin-top:24px;background:#fff;border:1px solid #E2E2E2;border-radius:12px;padding:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <h3 style="font-size:13px;font-weight:600;">Action Items</h3>
+          <button class="btn-secondary" id="extract-actions-btn">⚡ Extract from notes</button>
+        </div>
+        <div id="action-items">
+          <p style="font-size:12px;color:#6B6B6B;">No action items yet. Click "Extract from notes" to pull ☐ items automatically.</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script type="module">
+  import { db, showToast, renderUser, openProfileModal } from "../js/db.js";
+
+  let currentMeetingId = null, pendingFiles = [], attachments = [];
+  renderUser();
+  document.getElementById("user-avatar").onclick = () => openProfileModal();
+
+  function loadMeetings() {
+    const meetings = db.getAll("meetings").sort((a,b) => (b.date||"").localeCompare(a.date||""));
+    const list = document.getElementById("meeting-list");
+    if (!meetings.length) { list.innerHTML = '<p class="empty-state">No meetings yet. Click "+ New Meeting" to start.</p>'; return; }
+    list.innerHTML = meetings.map(m => {
+      const dateStr = m.date ? new Date(m.date).toLocaleString("en-PH",{weekday:"short",month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "No date";
+      const preview = m.notes ? m.notes.replace(/<[^>]+>/g,"").substring(0,120) + "…" : "No notes yet.";
+      return `
+        <div class="meeting-card" onclick="openMeeting('${m.id}')">
+          <div class="meeting-date">◎ ${dateStr} ${m.project ? "· " + m.project : ""}</div>
+          <div class="meeting-title">${m.title || "Untitled Meeting"}</div>
+          <div class="meeting-preview">${preview}</div>
+          ${m.attendees ? `<div style="margin-top:6px;font-size:11px;color:#aaa;">👥 ${m.attendees}</div>` : ""}
+        </div>`;
+    }).join("");
+  }
+
+  window.openMeeting = function(id) {
+    currentMeetingId = id;
+    const m = db.get("meetings", id);
+    if (!m) return;
+    document.getElementById("m-title").value     = m.title || "";
+    document.getElementById("m-date").value      = m.date ? m.date.replace(" ","T").substring(0,16) : "";
+    document.getElementById("m-attendees").value = m.attendees || "";
+    document.getElementById("m-project").value   = m.project  || "";
+    document.getElementById("m-notes").innerHTML = m.notes    || "";
+    attachments = m.attachments || []; pendingFiles = [];
+    renderAttachList();
+    document.getElementById("editor-heading").textContent = m.title || "Meeting Notes";
+    showEditor();
+  };
+
+  function showEditor() {
+    document.getElementById("list-view").classList.add("hidden");
+    document.getElementById("editor-view").classList.remove("hidden");
+  }
+  function showList() {
+    document.getElementById("editor-view").classList.add("hidden");
+    document.getElementById("list-view").classList.remove("hidden");
+    currentMeetingId = null; pendingFiles = []; attachments = [];
+    loadMeetings();
+  }
+
+  document.getElementById("new-meeting-btn").onclick = () => {
+    currentMeetingId = null; attachments = []; pendingFiles = [];
+    ["m-title","m-attendees","m-project"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("m-date").value = new Date().toISOString().slice(0,16);
+    document.getElementById("m-notes").innerHTML = "";
+    document.getElementById("attach-list").innerHTML = "";
+    document.getElementById("editor-heading").textContent = "New Meeting";
+    showEditor();
+  };
+
+  document.getElementById("back-btn").onclick = showList;
+
+  document.getElementById("save-meeting-btn").onclick = async () => {
+    const title = document.getElementById("m-title").value.trim();
+    if (!title) { alert("Please enter a meeting title"); return; }
+
+    // Convert pending files to base64 data URLs
+    for (const file of pendingFiles) {
+      const dataUrl = await fileToDataUrl(file);
+      attachments.push({ name: file.name, url: dataUrl });
+    }
+    pendingFiles = [];
+
+    const data = {
+      title,
+      date:       document.getElementById("m-date").value,
+      attendees:  document.getElementById("m-attendees").value.trim(),
+      project:    document.getElementById("m-project").value.trim(),
+      notes:      document.getElementById("m-notes").innerHTML,
+      attachments,
+    };
+
+    if (currentMeetingId) {
+      db.update("meetings", currentMeetingId, data);
+    } else {
+      const m = db.add("meetings", data);
+      currentMeetingId = m.id;
+    }
+    showToast("Meeting saved!");
+    document.getElementById("editor-heading").textContent = title;
+  };
+
+  document.getElementById("delete-meeting-btn").onclick = () => {
+    if (!currentMeetingId) { showList(); return; }
+    if (!confirm("Delete this meeting?")) return;
+    db.delete("meetings", currentMeetingId);
+    showList();
+  };
+
+  // File attachments
+  document.getElementById("m-attach").onchange = (e) => {
+    const files = Array.from(e.target.files);
+    pendingFiles.push(...files);
+    files.forEach(f => {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = "📎 " + f.name;
+      document.getElementById("attach-list").appendChild(tag);
+    });
+    e.target.value = "";
+  };
+
+  function renderAttachList() {
+    const el = document.getElementById("attach-list");
+    el.innerHTML = attachments.map(a =>
+      `<a href="${a.url}" download="${a.name}" class="tag" style="text-decoration:none;">📎 ${a.name}</a>`
+    ).join("");
+  }
+
+  function fileToDataUrl(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload  = () => res(r.result);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+  }
+
+  // Extract action items
+  document.getElementById("extract-actions-btn").onclick = () => {
+    const html  = document.getElementById("m-notes").innerHTML;
+    const text  = html.replace(/<br\s*\/?>/gi,"\n").replace(/<[^>]+>/g,"");
+    const lines = text.split("\n").filter(l => l.includes("☐") || l.toLowerCase().includes("action:") || l.toLowerCase().includes("todo:"));
+    const container = document.getElementById("action-items");
+    if (!lines.length) { container.innerHTML = '<p style="font-size:12px;color:#6B6B6B;">No action items found. Type ☐ before a task in your notes.</p>'; return; }
+    container.innerHTML = lines.map(l => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#F7F7F5;border-radius:8px;font-size:13px;">
+        <span style="flex:1;">${l.replace("☐","").trim()}</span>
+        <button onclick="convertToTask(this,'${encodeURIComponent(l.replace("☐","").trim())}')" class="btn-secondary" style="font-size:11px;padding:4px 10px;">+ Add Task</button>
+      </div>`).join("");
+  };
+
+  window.convertToTask = (btn, encodedTitle) => {
+    const title = decodeURIComponent(encodedTitle);
+    db.add("tasks", { title, priority: 3, estimatedHours: 1, status: "todo" });
+    btn.textContent = "✓ Added"; btn.disabled = true;
+    showToast("Task added to Dashboard!");
+  };
+
+  // Toolbar helpers
+  window.fmt           = (cmd) => document.execCommand(cmd, false, null);
+  window.insertHeading = () => { document.getElementById("m-notes").focus(); document.execCommand("insertHTML",false,"<h3 style='font-size:15px;font-weight:600;margin:12px 0 4px;'>Heading</h3>"); };
+  window.insertBullet  = () => { document.getElementById("m-notes").focus(); document.execCommand("insertHTML",false,"<ul style='padding-left:18px;'><li>Item</li></ul>"); };
+  window.insertTodo    = () => { document.getElementById("m-notes").focus(); document.execCommand("insertHTML",false,"<div>☐ Action item</div>"); };
+  window.insertDivider = () => { document.getElementById("m-notes").focus(); document.execCommand("insertHTML",false,"<hr style='border:none;border-top:1px solid #E2E2E2;margin:12px 0;'/>"); };
+  window.insertDate    = () => {
+    const d = new Date().toLocaleDateString("en-PH",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+    document.getElementById("m-notes").focus();
+    document.execCommand("insertHTML",false,`<strong>${d}</strong>`);
+  };
+
+  loadMeetings();
+</script>
+</body>
+</html>

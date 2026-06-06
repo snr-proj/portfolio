@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calendar — Estreccella</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div id="app" class="app">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">✦</span><span class="logo-text">Estreccella</span></div>
+    <nav class="sidebar-nav">
+      <a href="../index.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="calendar.html" class="nav-item active"><span class="nav-icon">◫</span> Calendar</a>
+      <a href="projects.html" class="nav-item"><span class="nav-icon">◈</span> Projects & Timeline</a>
+      <a href="sprint.html" class="nav-item"><span class="nav-icon">⚡</span> Sprint Board</a>
+      <a href="meetings.html" class="nav-item"><span class="nav-icon">◎</span> Meetings</a>
+      <a href="docs.html" class="nav-item"><span class="nav-icon">◻</span> Documents</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="user-avatar" title="Edit profile"></div>
+      <div class="user-info"><div id="user-name" class="user-name">You</div><div id="user-email" class="user-email"></div></div>
+      <button class="logout-btn" onclick="window.location='../index.html'" title="Home">↩</button>
+    </div>
+  </aside>
+
+  <main class="main-content" style="max-width:100%;">
+    <div class="page-header">
+      <h1 class="page-title">Calendar</h1>
+      <p class="page-sub">Your auto-scheduled tasks for the week.</p>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+      <button class="btn-secondary" id="prev-week">← Prev Week</button>
+      <span id="week-label" style="font-size:14px;font-weight:500;min-width:180px;text-align:center;"></span>
+      <button class="btn-secondary" id="next-week">Next Week →</button>
+      <button class="btn-primary" id="goto-today">Today</button>
+    </div>
+
+    <div style="display:flex;gap:20px;font-size:11px;color:#6B6B6B;margin-bottom:14px;flex-wrap:wrap;">
+      <span>📅 <strong>Mon / Thu:</strong> 8am – 5pm</span>
+      <span>📅 <strong>Tue / Wed / Fri:</strong> 9am – 6pm</span>
+      <span style="color:#E53935;">⚠ Red = overdue</span>
+      <span style="color:#2E7D32;">● Green = done</span>
+    </div>
+
+    <div class="calendar-grid" id="cal-grid">
+      <div class="cal-day-header">Monday</div>
+      <div class="cal-day-header">Tuesday</div>
+      <div class="cal-day-header">Wednesday</div>
+      <div class="cal-day-header">Thursday</div>
+      <div class="cal-day-header">Friday</div>
+      <div class="cal-day-header">Saturday</div>
+      <div class="cal-day-header">Sunday</div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+  import { db, renderUser, openProfileModal } from "../js/db.js";
+
+  let weekOffset = 0;
+  renderUser();
+  document.getElementById("user-avatar").onclick = () => openProfileModal();
+
+  document.getElementById("prev-week").onclick  = () => { weekOffset--; renderCalendar(); };
+  document.getElementById("next-week").onclick  = () => { weekOffset++; renderCalendar(); };
+  document.getElementById("goto-today").onclick = () => { weekOffset = 0; renderCalendar(); };
+
+  function getMonday(offset) {
+    const d = new Date();
+    const day = d.getDay();
+    d.setDate(d.getDate() - day + (day === 0 ? -6 : 1) + offset * 7);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  function renderCalendar() {
+    const monday = getMonday(weekOffset);
+    const sunday = new Date(monday); sunday.setDate(sunday.getDate() + 6);
+    const fmt = (d) => d.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
+    document.getElementById("week-label").textContent = `${fmt(monday)} — ${fmt(sunday)}`;
+
+    const tasks = db.getAll("tasks");
+    const grid  = document.getElementById("cal-grid");
+    while (grid.children.length > 7) grid.removeChild(grid.lastChild);
+
+    const now = new Date();
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(monday);
+      day.setDate(day.getDate() + i);
+      const isToday   = day.toDateString() === now.toDateString();
+      const dayStr    = day.toISOString().split("T")[0];
+      const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+
+      const cell = document.createElement("div");
+      cell.className = "cal-day" + (isToday ? " today" : "");
+      if (isWeekend) cell.style.background = "#fafafa";
+
+      const dateEl = document.createElement("div");
+      dateEl.className = "cal-date" + (isToday ? " today-num" : "");
+      dateEl.textContent = day.getDate();
+      cell.appendChild(dateEl);
+
+      if (isWeekend) {
+        const wkEl = document.createElement("div");
+        wkEl.style.cssText = "font-size:10px;color:#aaa;margin-top:4px;";
+        wkEl.textContent = "Weekend";
+        cell.appendChild(wkEl);
+      }
+
+      tasks.forEach(task => {
+        const schedDay = task.scheduledStart ? task.scheduledStart.split("T")[0] : null;
+        const dueDay   = task.dueDate || null;
+        if (schedDay !== dayStr && dueDay !== dayStr) return;
+
+        const isOverdue = task.dueDate && new Date(task.dueDate) < now && task.status !== "done";
+        const isDone    = task.status === "done";
+        const el = document.createElement("div");
+        el.className = `cal-task p${task.priority}`;
+        if (isOverdue) { el.style.background = "#ffeaea"; el.style.color = "#c62828"; }
+        if (isDone)    { el.style.opacity = "0.5"; el.style.textDecoration = "line-through"; }
+
+        const timeStr = task.scheduledStart
+          ? new Date(task.scheduledStart).toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit" })
+          : "";
+        el.textContent = (isOverdue ? "⚠ " : isDone ? "✓ " : "") + (timeStr ? timeStr + " " : "") + task.title;
+        el.title = task.title + (task.estimatedHours ? ` (${task.estimatedHours}h)` : "");
+        cell.appendChild(el);
+      });
+
+      grid.appendChild(cell);
+    }
+  }
+
+  renderCalendar();
+</script>
+</body>
+</html>

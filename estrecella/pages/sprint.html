@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sprint Board — Estreccella</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div id="app" class="app">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">✦</span><span class="logo-text">Estreccella</span></div>
+    <nav class="sidebar-nav">
+      <a href="../index.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="calendar.html" class="nav-item"><span class="nav-icon">◫</span> Calendar</a>
+      <a href="projects.html" class="nav-item"><span class="nav-icon">◈</span> Projects & Timeline</a>
+      <a href="sprint.html" class="nav-item active"><span class="nav-icon">⚡</span> Sprint Board</a>
+      <a href="meetings.html" class="nav-item"><span class="nav-icon">◎</span> Meetings</a>
+      <a href="docs.html" class="nav-item"><span class="nav-icon">◻</span> Documents</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="user-avatar" title="Edit profile"></div>
+      <div class="user-info"><div id="user-name" class="user-name">You</div><div id="user-email" class="user-email"></div></div>
+      <button class="logout-btn" onclick="window.location='../index.html'" title="Home">↩</button>
+    </div>
+  </aside>
+
+  <main class="main-content" style="max-width:100%;">
+    <div class="page-header">
+      <h1 class="page-title">Sprint Board</h1>
+      <p class="page-sub">Agile sprint management — drag tasks across columns.</p>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+      <select id="sprint-select" class="select"><option value="">— Select a Sprint —</option></select>
+      <button class="btn-primary" id="new-sprint-btn">+ New Sprint</button>
+      <button class="btn-secondary" id="add-card-btn">+ Add Task</button>
+    </div>
+
+    <div id="sprint-info" class="hidden" style="background:#fff;border:1px solid #E2E2E2;border-radius:12px;padding:14px 20px;margin-bottom:20px;display:none;gap:28px;align-items:center;flex-wrap:wrap;">
+      <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:2px;">Sprint</div><div id="si-name" style="font-size:15px;font-weight:600;"></div></div>
+      <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:2px;">Dates</div><div id="si-dates" style="font-size:13px;"></div></div>
+      <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:2px;">Goal</div><div id="si-goal" style="font-size:13px;color:#6B6B6B;"></div></div>
+      <div style="margin-left:auto;"><span id="si-status" class="priority-badge p3"></span></div>
+    </div>
+
+    <div class="sprint-board">
+      <div class="sprint-col" id="col-todo" ondragover="event.preventDefault()" ondrop="drop(event,'todo')">
+        <div class="sprint-col-title">To Do <span id="cnt-todo" style="font-weight:400;color:#bbb;margin-left:4px;">0</span></div>
+        <div id="cards-todo"></div>
+      </div>
+      <div class="sprint-col" id="col-inprogress" ondragover="event.preventDefault()" ondrop="drop(event,'inprogress')">
+        <div class="sprint-col-title">In Progress <span id="cnt-inprogress" style="font-weight:400;color:#bbb;margin-left:4px;">0</span></div>
+        <div id="cards-inprogress"></div>
+      </div>
+      <div class="sprint-col" id="col-done" ondragover="event.preventDefault()" ondrop="drop(event,'done')">
+        <div class="sprint-col-title">Done <span id="cnt-done" style="font-weight:400;color:#bbb;margin-left:4px;">0</span></div>
+        <div id="cards-done"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- New Sprint Modal -->
+<div id="sprint-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <h2 class="modal-title">New Sprint</h2>
+    <div class="form-group"><label class="label">Sprint name *</label><input type="text" id="s-name" class="input" style="width:100%;" placeholder="e.g. Sprint 1 — Onboarding"/></div>
+    <div class="form-group"><label class="label">Sprint goal</label><input type="text" id="s-goal" class="input" style="width:100%;" placeholder="What will this sprint achieve?"/></div>
+    <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div><label class="label">Start date</label><input type="date" id="s-start" class="input" style="width:100%;"/></div>
+      <div><label class="label">End date</label><input type="date" id="s-end" class="input" style="width:100%;"/></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="cancel-sprint">Cancel</button>
+      <button class="btn-primary" id="save-sprint">Create Sprint</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Task Modal -->
+<div id="card-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <h2 class="modal-title">Add Task to Sprint</h2>
+    <div class="form-group"><label class="label">Task title *</label><input type="text" id="c-title" class="input" style="width:100%;" placeholder="What needs to be done?"/></div>
+    <div class="form-group"><label class="label">Description</label><input type="text" id="c-desc" class="input" style="width:100%;" placeholder="Optional notes..."/></div>
+    <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      <div><label class="label">Priority</label>
+        <select id="c-prio" class="select" style="width:100%;">
+          <option value="1">P1 — Urgent</option><option value="2">P2 — High</option>
+          <option value="3" selected>P3 — Medium</option><option value="4">P4 — Low</option><option value="5">P5 — Someday</option>
+        </select>
+      </div>
+      <div><label class="label">Est. hours</label><input type="number" id="c-hours" class="input" style="width:100%;" value="1" min="0.5" step="0.5"/></div>
+      <div><label class="label">Due date</label><input type="date" id="c-due" class="input" style="width:100%;"/></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="cancel-card">Cancel</button>
+      <button class="btn-primary" id="save-card">Add Task</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { db, showToast, renderUser, openProfileModal } from "../js/db.js";
+
+  let currentSprintId = null;
+  renderUser();
+  document.getElementById("user-avatar").onclick = () => openProfileModal();
+
+  function loadSprints() {
+    const sprints = db.getAll("sprints").sort((a,b) => (b.createdAt||"").localeCompare(a.createdAt||""));
+    const sel = document.getElementById("sprint-select");
+    sel.innerHTML = '<option value="">— Select a Sprint —</option>';
+    sprints.forEach(s => {
+      const o = document.createElement("option");
+      o.value = s.id; o.textContent = s.name;
+      sel.appendChild(o);
+    });
+    if (sprints.length) { sel.value = sprints[0].id; loadBoard(sprints[0].id); }
+  }
+
+  document.getElementById("sprint-select").onchange = (e) => {
+    if (e.target.value) loadBoard(e.target.value);
+  };
+
+  function loadBoard(sprintId) {
+    currentSprintId = sprintId;
+    const sprint = db.get("sprints", sprintId);
+    if (!sprint) return;
+
+    const info = document.getElementById("sprint-info");
+    info.classList.remove("hidden"); info.style.display = "flex";
+    document.getElementById("si-name").textContent  = sprint.name;
+    document.getElementById("si-dates").textContent = `${sprint.startDate||"?"} → ${sprint.endDate||"?"}`;
+    document.getElementById("si-goal").textContent  = sprint.goal || "No goal set";
+    document.getElementById("si-status").textContent = sprint.status || "planning";
+
+    const tasks = db.getAll("tasks", t => t.sprintId === sprintId);
+    const now   = new Date();
+
+    ["todo","inprogress","done"].forEach(status => {
+      const col = tasks.filter(t => t.status === status);
+      document.getElementById(`cnt-${status}`).textContent = col.length;
+      document.getElementById(`cards-${status}`).innerHTML = col.length ? col.map(t => {
+        const overdue = t.dueDate && new Date(t.dueDate) < now && t.status !== "done";
+        return `
+          <div class="sprint-card" draggable="true" id="sc-${t.id}"
+            ondragstart="window._drag='${t.id}'">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span class="priority-badge p${t.priority}">P${t.priority}</span>
+              <button onclick="delCard('${t.id}')" style="background:none;border:none;cursor:pointer;color:#bbb;font-size:12px;">✕</button>
+            </div>
+            <div style="font-size:13px;font-weight:500;margin-bottom:4px;">${t.title}</div>
+            ${t.description ? `<div style="font-size:11px;color:#6B6B6B;margin-bottom:6px;">${t.description}</div>` : ""}
+            <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:10px;color:#aaa;">
+              ${t.estimatedHours ? `<span>⏱ ${t.estimatedHours}h</span>` : ""}
+              ${t.dueDate ? `<span style="color:${overdue?"#E53935":"#aaa"}">${overdue?"⚠ ":""}${t.dueDate}</span>` : ""}
+            </div>
+          </div>`;
+      }).join("") : `<div style="font-size:12px;color:#bbb;text-align:center;padding:24px 0;">No tasks</div>`;
+    });
+  }
+
+  window.drop = (e, status) => {
+    e.preventDefault();
+    const id = window._drag; if (!id || !currentSprintId) return;
+    db.update("tasks", id, { status });
+    window._drag = null;
+    loadBoard(currentSprintId);
+  };
+
+  window.delCard = (id) => {
+    if (!confirm("Remove this task?")) return;
+    db.delete("tasks", id);
+    loadBoard(currentSprintId);
+  };
+
+  // New sprint
+  document.getElementById("new-sprint-btn").onclick = () => document.getElementById("sprint-modal").classList.remove("hidden");
+  document.getElementById("cancel-sprint").onclick  = () => document.getElementById("sprint-modal").classList.add("hidden");
+  document.getElementById("save-sprint").onclick = () => {
+    const name = document.getElementById("s-name").value.trim();
+    if (!name) { alert("Sprint name is required"); return; }
+    const sprint = db.add("sprints", {
+      name, goal: document.getElementById("s-goal").value.trim(),
+      startDate: document.getElementById("s-start").value || null,
+      endDate:   document.getElementById("s-end").value   || null,
+      status: "planning",
+    });
+    document.getElementById("sprint-modal").classList.add("hidden");
+    ["s-name","s-goal","s-start","s-end"].forEach(id => document.getElementById(id).value = "");
+    loadSprints();
+    showToast("Sprint created!");
+  };
+
+  // Add task
+  document.getElementById("add-card-btn").onclick = () => {
+    if (!currentSprintId) { alert("Please select a sprint first"); return; }
+    document.getElementById("card-modal").classList.remove("hidden");
+  };
+  document.getElementById("cancel-card").onclick = () => document.getElementById("card-modal").classList.add("hidden");
+  document.getElementById("save-card").onclick = () => {
+    const title = document.getElementById("c-title").value.trim();
+    if (!title) { alert("Task title is required"); return; }
+    db.add("tasks", {
+      title, description: document.getElementById("c-desc").value.trim(),
+      priority: parseInt(document.getElementById("c-prio").value),
+      estimatedHours: parseFloat(document.getElementById("c-hours").value) || 1,
+      dueDate: document.getElementById("c-due").value || null,
+      status: "todo", sprintId: currentSprintId,
+    });
+    document.getElementById("card-modal").classList.add("hidden");
+    ["c-title","c-desc","c-due"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("c-prio").value = "3";
+    document.getElementById("c-hours").value = "1";
+    loadBoard(currentSprintId);
+    showToast("Task added!");
+  };
+
+  loadSprints();
+</script>
+</body>
+</html>
