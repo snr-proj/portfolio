@@ -9,21 +9,20 @@
 </head>
 <body>
 <div id="app" class="app">
-
   <aside class="sidebar">
     <div class="sidebar-logo"><span class="logo-icon">✦</span><span class="logo-text">Estreccella</span></div>
     <nav class="sidebar-nav">
+      <div class="nav-section-label">Workspace</div>
       <a href="../index.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
       <a href="calendar.html" class="nav-item"><span class="nav-icon">◫</span> Calendar</a>
       <a href="projects.html" class="nav-item active"><span class="nav-icon">◈</span> Projects & Timeline</a>
-      <a href="sprint.html" class="nav-item"><span class="nav-icon">⚡</span> Sprint Board</a>
+      <a href="sprint.html" class="nav-item"><span class="nav-icon">◉</span> Sprint Board</a>
       <a href="meetings.html" class="nav-item"><span class="nav-icon">◎</span> Meetings</a>
       <a href="docs.html" class="nav-item"><span class="nav-icon">◻</span> Documents</a>
     </nav>
     <div class="sidebar-user">
-      <div class="user-avatar" id="user-avatar" title="Edit profile"></div>
-      <div class="user-info"><div id="user-name" class="user-name">You</div><div id="user-email" class="user-email"></div></div>
-      <button class="logout-btn" onclick="window.location='../index.html'" title="Home">↩</button>
+      <img id="user-photo" src="" alt="" class="user-avatar" onerror="this.src='https://ui-avatars.com/api/?background=2D2D2D&color=fff&name=U'"/>
+      <div class="user-info"><div id="user-name" class="user-name">Loading...</div><div id="user-email" class="user-email"></div></div>
     </div>
   </aside>
 
@@ -35,11 +34,11 @@
 
     <div style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;align-items:center;">
       <button class="btn-primary" id="new-proj-btn">+ New Project</button>
-      <label class="btn-secondary" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+      <label class="btn-secondary" style="cursor:pointer;">
         📥 Import MS Project (.xml)
         <input type="file" id="msp-file" accept=".xml" style="display:none;"/>
       </label>
-      <span id="import-status" style="font-size:12px;color:#6B6B6B;"></span>
+      <span id="import-msg" style="font-size:12px;color:#6B6B6B;"></span>
     </div>
 
     <div id="project-list" class="section"></div>
@@ -49,27 +48,12 @@
         <h2 class="section-title" id="gantt-title">Timeline</h2>
         <button class="btn-secondary" onclick="document.getElementById('gantt-section').classList.add('hidden')">Close ✕</button>
       </div>
-      <div style="display:flex;gap:16px;font-size:11px;color:#6B6B6B;margin-bottom:10px;">
-        <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#0F0F0F;border-radius:2px;"></span> Scheduled</span>
-        <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#E53935;border-radius:2px;"></span> Overdue</span>
-        <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#B45309;border-radius:2px;"></span> Near due (≤3 days)</span>
-        <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:10px;height:10px;background:#2E7D32;border-radius:2px;"></span> Done</span>
+      <div style="display:flex;gap:16px;font-size:11px;color:#6B6B6B;margin-bottom:10px;flex-wrap:wrap;">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#0F0F0F;border-radius:2px;margin-right:4px;"></span>Scheduled</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#E53935;border-radius:2px;margin-right:4px;"></span>Overdue</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#B45309;border-radius:2px;margin-right:4px;"></span>Due soon</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#2E7D32;border-radius:2px;margin-right:4px;"></span>Done</span>
       </div>
-
-      <!-- Add task to project -->
-      <div style="background:#fff;border:1px solid #E2E2E2;border-radius:12px;padding:16px;margin-bottom:16px;">
-        <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:#6B6B6B;text-transform:uppercase;letter-spacing:.3px;">Add Task to Project</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <input type="text" id="gt-title" class="input" placeholder="Task title *" style="min-width:180px;"/>
-          <input type="date" id="gt-start" class="input" style="flex:0 0 130px;min-width:130px;"/>
-          <input type="date" id="gt-due" class="input" style="flex:0 0 130px;min-width:130px;"/>
-          <select id="gt-prio" class="select">
-            <option value="1">P1</option><option value="2">P2</option><option value="3" selected>P3</option><option value="4">P4</option><option value="5">P5</option>
-          </select>
-          <button class="btn-primary" id="gt-add-btn">+ Add Task</button>
-        </div>
-      </div>
-
       <div class="gantt-wrap">
         <table class="gantt-table">
           <thead>
@@ -77,7 +61,7 @@
               <th style="width:220px;">Task</th>
               <th style="width:90px;">Start</th>
               <th style="width:90px;">Due</th>
-              <th style="width:90px;">Progress</th>
+              <th style="width:100px;">Progress</th>
               <th style="width:80px;">Status</th>
               <th class="gantt-bar-cell">Bar</th>
             </tr>
@@ -107,30 +91,49 @@
 </div>
 
 <script type="module">
-  import { db, showToast, renderUser, openProfileModal } from "../js/db.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  let currentProjectId = null;
-  renderUser();
-  document.getElementById("user-avatar").onclick = () => openProfileModal();
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDCvcPiEW9zMs2hJSRXtF5lYtUyCMoRIlE",
+    authDomain:        "estreccella.firebaseapp.com",
+    projectId:         "estreccella",
+    storageBucket:     "estreccella.firebasestorage.app",
+    messagingSenderId: "403183247546",
+    appId:             "1:403183247546:web:4764761e002cc1de602283"
+  };
 
-  function loadProjects() {
-    const projects = db.getAll("projects");
-    const list = document.getElementById("project-list");
-    if (!projects.length) {
-      list.innerHTML = '<p class="empty-state">No projects yet. Create one or import from MS Project XML.</p>';
-      return;
-    }
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  let uid = null;
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) { window.location.href = "../index.html"; return; }
+    uid = user.uid;
+    document.getElementById("user-photo").src         = user.photoURL || "";
+    document.getElementById("user-name").textContent  = user.displayName || "";
+    document.getElementById("user-email").textContent = user.email || "";
+    loadProjects();
+  });
+
+  async function loadProjects() {
+    const snap     = await getDocs(query(collection(db,"projects"), where("ownerId","==",uid)));
+    const projects = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const list     = document.getElementById("project-list");
+    if (!projects.length) { list.innerHTML = '<p class="empty-state">No projects yet. Create one or import from MS Project XML.</p>'; return; }
     const now = new Date();
     list.innerHTML = projects.map(p => {
       const isOverdue = p.endDate && new Date(p.endDate) < now;
-      const daysLeft  = p.endDate ? Math.ceil((new Date(p.endDate) - now) / 86400000) : null;
+      const daysLeft  = p.endDate ? Math.ceil((new Date(p.endDate)-now)/86400000) : null;
       return `
-        <div class="meeting-card" style="position:relative;">
+        <div class="meeting-card">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div>
               <div class="meeting-date">
                 ${p.startDate||"?"} → ${p.endDate||"?"}
-                ${isOverdue ? '<span style="color:#E53935;font-weight:500;"> ⚠ Overdue</span>' : ""}
+                ${isOverdue ? '<span style="color:#E53935;"> ⚠ Overdue</span>' : ""}
                 ${!isOverdue && daysLeft !== null && daysLeft <= 7 ? `<span style="color:#B45309;"> · ${daysLeft}d left</span>` : ""}
               </div>
               <div class="meeting-title">${p.name}</div>
@@ -138,140 +141,106 @@
             </div>
             <div style="display:flex;gap:6px;flex-shrink:0;">
               <button class="btn-secondary" onclick="showGantt('${p.id}','${p.name.replace(/'/g,"\\'")}')">View Gantt</button>
-              <button class="btn-danger" onclick="deleteProject('${p.id}')">✕</button>
+              <button class="btn-danger" onclick="delProject('${p.id}')">✕</button>
             </div>
           </div>
         </div>`;
     }).join("");
   }
 
-  window.showGantt = function(projectId, projectName) {
-    currentProjectId = projectId;
+  window.showGantt = async (projectId, projectName) => {
     document.getElementById("gantt-title").textContent = projectName + " — Timeline";
     document.getElementById("gantt-section").classList.remove("hidden");
-    renderGantt(projectId);
-    document.getElementById("gantt-section").scrollIntoView({ behavior: "smooth" });
-  };
-
-  function renderGantt(projectId) {
-    const tasks = db.getAll("tasks", t => t.projectId === projectId);
+    const snap  = await getDocs(query(collection(db,"tasks"), where("ownerId","==",uid), where("projectId","==",projectId)));
+    const tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     const now   = new Date();
-
     if (!tasks.length) {
-      document.getElementById("gantt-body").innerHTML = '<tr><td colspan="6"><p style="padding:16px;color:#6B6B6B;text-align:center;">No tasks yet. Add one above.</p></td></tr>';
+      document.getElementById("gantt-body").innerHTML = '<tr><td colspan="6" style="text-align:center;color:#6B6B6B;padding:20px;">No tasks for this project.</td></tr>';
+      document.getElementById("gantt-section").scrollIntoView({ behavior:"smooth" });
       return;
     }
-
-    const dates  = tasks.flatMap(t => [t.startDate, t.dueDate].filter(Boolean)).map(d => new Date(d));
-    const minD   = dates.length ? new Date(Math.min(...dates)) : now;
-    const maxD   = dates.length ? new Date(Math.max(...dates)) : now;
-    const range  = Math.max((maxD - minD) / 86400000, 1);
-
+    const dates = tasks.flatMap(t => [t.startDate, t.dueDate].filter(Boolean)).map(d => new Date(d));
+    const minD  = new Date(Math.min(...dates));
+    const maxD  = new Date(Math.max(...dates));
+    const range = Math.max((maxD-minD)/86400000, 1);
     document.getElementById("gantt-body").innerHTML = tasks.map(t => {
-      const start     = t.startDate ? new Date(t.startDate) : minD;
-      const end       = t.dueDate   ? new Date(t.dueDate)   : maxD;
-      const pct       = t.progress  || (t.status === "done" ? 100 : t.status === "inprogress" ? 50 : 0);
-      const left      = ((start - minD) / 86400000 / range * 100).toFixed(1);
-      const width     = Math.max(((end - start) / 86400000 / range * 100), 2).toFixed(1);
-      const isOverdue = end < now && t.status !== "done";
-      const isNear    = !isOverdue && (end - now) < 3 * 86400000 && t.status !== "done";
-      const barClass  = t.status === "done" ? "done" : isOverdue ? "overdue" : isNear ? "near" : "";
+      const start  = t.startDate ? new Date(t.startDate) : minD;
+      const end    = t.dueDate   ? new Date(t.dueDate)   : maxD;
+      const pct    = t.progress  || (t.status==="done" ? 100 : t.status==="inprogress" ? 50 : 0);
+      const left   = ((start-minD)/86400000/range*100).toFixed(1);
+      const width  = Math.max(((end-start)/86400000/range*100),2).toFixed(1);
+      const isOver = end < now && t.status !== "done";
+      const isNear = !isOver && (end-now) < 3*86400000 && t.status !== "done";
+      const barCls = t.status==="done" ? "done" : isOver ? "overdue" : isNear ? "near" : "";
       return `
         <tr>
-          <td>${t.isMilestone ? "◆ " : ""}${t.title}</td>
+          <td>${t.isMilestone?"◆ ":""}${t.title}</td>
           <td style="font-size:11px;color:#6B6B6B;">${t.startDate||"—"}</td>
-          <td style="font-size:11px;color:${isOverdue?"#E53935":"#6B6B6B"};">${t.dueDate||"—"}</td>
+          <td style="font-size:11px;color:${isOver?"#E53935":"#6B6B6B"};">${t.dueDate||"—"}</td>
           <td><div class="progress-pill"><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div><span class="progress-pct">${pct}%</span></div></td>
           <td><span class="priority-badge p${t.priority||3}">${t.status||"todo"}</span></td>
-          <td class="gantt-bar-cell"><div class="gantt-bar-track"><div class="gantt-bar ${barClass}" style="left:${left}%;width:${width}%;"></div></div></td>
+          <td class="gantt-bar-cell"><div class="gantt-bar-track"><div class="gantt-bar ${barCls}" style="left:${left}%;width:${width}%;"></div></div></td>
         </tr>`;
     }).join("");
-  }
-
-  document.getElementById("gt-add-btn").onclick = () => {
-    if (!currentProjectId) return;
-    const title = document.getElementById("gt-title").value.trim();
-    if (!title) { showToast("Task title required"); return; }
-    db.add("tasks", {
-      title,
-      startDate: document.getElementById("gt-start").value || null,
-      dueDate:   document.getElementById("gt-due").value   || null,
-      priority:  parseInt(document.getElementById("gt-prio").value),
-      status: "todo", estimatedHours: 1, progress: 0,
-      projectId: currentProjectId,
-    });
-    document.getElementById("gt-title").value = "";
-    document.getElementById("gt-start").value = "";
-    document.getElementById("gt-due").value   = "";
-    showToast("Task added!");
-    renderGantt(currentProjectId);
+    document.getElementById("gantt-section").scrollIntoView({ behavior:"smooth" });
   };
 
-  window.deleteProject = function(id) {
-    if (!confirm("Delete this project? Tasks linked to it will remain.")) return;
-    db.delete("projects", id);
+  window.delProject = async (id) => {
+    if (!confirm("Delete this project?")) return;
+    await deleteDoc(doc(db,"projects",id));
     loadProjects();
   };
 
-  // New project modal
-  document.getElementById("new-proj-btn").onclick  = () => document.getElementById("proj-modal").classList.remove("hidden");
-  document.getElementById("cancel-proj").onclick   = () => document.getElementById("proj-modal").classList.add("hidden");
-  document.getElementById("save-proj").onclick     = () => {
+  document.getElementById("new-proj-btn").onclick = () => document.getElementById("proj-modal").classList.remove("hidden");
+  document.getElementById("cancel-proj").onclick  = () => document.getElementById("proj-modal").classList.add("hidden");
+  document.getElementById("save-proj").onclick = async () => {
     const name = document.getElementById("p-name").value.trim();
     if (!name) { alert("Project name is required"); return; }
-    db.add("projects", {
+    await addDoc(collection(db,"projects"), {
       name, description: document.getElementById("p-desc").value.trim(),
-      startDate: document.getElementById("p-start").value || null,
-      endDate:   document.getElementById("p-end").value   || null,
+      startDate: document.getElementById("p-start").value||null,
+      endDate:   document.getElementById("p-end").value||null,
+      ownerId: uid, createdAt: serverTimestamp(),
     });
     document.getElementById("proj-modal").classList.add("hidden");
-    ["p-name","p-desc","p-start","p-end"].forEach(id => document.getElementById(id).value = "");
+    ["p-name","p-desc","p-start","p-end"].forEach(id => document.getElementById(id).value="");
     loadProjects();
   };
 
-  // MS Project XML import
   document.getElementById("msp-file").onchange = async (e) => {
     const file = e.target.files[0]; if (!file) return;
-    const statusEl = document.getElementById("import-status");
-    statusEl.textContent = "Importing...";
+    const msg  = document.getElementById("import-msg");
+    msg.textContent = "Importing...";
     try {
-      const text  = await file.text();
-      const xml   = new DOMParser().parseFromString(text, "text/xml");
-      if (xml.querySelector("parsererror")) throw new Error("Invalid XML");
-      const nodes = xml.querySelectorAll("Task");
-
-      const proj = db.add("projects", {
-        name: file.name.replace(".xml",""),
-        description: "Imported from MS Project",
+      const xml  = new DOMParser().parseFromString(await file.text(), "text/xml");
+      if (xml.querySelector("parsererror")) throw new Error("Invalid XML file");
+      const projRef = await addDoc(collection(db,"projects"), {
+        name: file.name.replace(".xml",""), description: "Imported from MS Project",
+        ownerId: uid, createdAt: serverTimestamp(),
       });
-
       let count = 0;
-      for (const node of nodes) {
+      for (const node of xml.querySelectorAll("Task")) {
         const taskUid = node.querySelector("UID")?.textContent?.trim();
-        const name    = node.querySelector("Name")?.textContent?.trim();
-        if (!taskUid || taskUid === "0" || !name) continue;
-        const pct   = parseInt(node.querySelector("PercentComplete")?.textContent || "0");
-        const start = node.querySelector("Start")?.textContent?.split("T")[0]  || null;
-        const end   = node.querySelector("Finish")?.textContent?.split("T")[0] || null;
-        const prior = parseInt(node.querySelector("Priority")?.textContent || "500");
-        const isMilestone = node.querySelector("Milestone")?.textContent === "1";
-        db.add("tasks", {
-          title: name, progress: pct, startDate: start, dueDate: end, isMilestone,
-          status: pct === 100 ? "done" : pct > 0 ? "inprogress" : "todo",
-          priority: prior >= 800 ? 1 : prior >= 600 ? 2 : prior >= 400 ? 3 : prior >= 200 ? 4 : 5,
-          projectId: proj.id, estimatedHours: 1,
+        const name2   = node.querySelector("Name")?.textContent?.trim();
+        if (!taskUid || taskUid==="0" || !name2) continue;
+        const pct   = parseInt(node.querySelector("PercentComplete")?.textContent||"0");
+        const prior = parseInt(node.querySelector("Priority")?.textContent||"500");
+        await addDoc(collection(db,"tasks"), {
+          title: name2, progress: pct,
+          startDate:   node.querySelector("Start")?.textContent?.split("T")[0]||null,
+          dueDate:     node.querySelector("Finish")?.textContent?.split("T")[0]||null,
+          isMilestone: node.querySelector("Milestone")?.textContent==="1",
+          status: pct===100?"done":pct>0?"inprogress":"todo",
+          priority: prior>=800?1:prior>=600?2:prior>=400?3:prior>=200?4:5,
+          projectId: projRef.id, ownerId: uid, estimatedHours: 1, createdAt: serverTimestamp(),
         });
         count++;
       }
-      statusEl.textContent = `✓ Imported ${count} tasks`;
+      msg.textContent = `✓ Imported ${count} tasks successfully`;
       loadProjects();
-    } catch (err) {
-      statusEl.textContent = "Error: " + err.message;
-    }
+    } catch (err) { msg.textContent = "Error: " + err.message; }
     e.target.value = "";
   };
-
-  loadProjects();
 </script>
 </body>
 </html>

@@ -9,73 +9,101 @@
 </head>
 <body>
 <div id="app" class="app">
-
   <aside class="sidebar">
     <div class="sidebar-logo"><span class="logo-icon">✦</span><span class="logo-text">Estreccella</span></div>
     <nav class="sidebar-nav">
+      <div class="nav-section-label">Workspace</div>
       <a href="../index.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
       <a href="calendar.html" class="nav-item"><span class="nav-icon">◫</span> Calendar</a>
       <a href="projects.html" class="nav-item"><span class="nav-icon">◈</span> Projects & Timeline</a>
-      <a href="sprint.html" class="nav-item active"><span class="nav-icon">⚡</span> Sprint Board</a>
+      <a href="sprint.html" class="nav-item active"><span class="nav-icon">◉</span> Sprint Board</a>
       <a href="meetings.html" class="nav-item"><span class="nav-icon">◎</span> Meetings</a>
       <a href="docs.html" class="nav-item"><span class="nav-icon">◻</span> Documents</a>
     </nav>
-    <div class="sidebar-user">
-      <div class="user-avatar" id="user-avatar" title="Edit profile"></div>
-      <div class="user-info"><div id="user-name" class="user-name">You</div><div id="user-email" class="user-email"></div></div>
-      <button class="logout-btn" onclick="window.location='../index.html'" title="Home">↩</button>
+    <div class="sidebar-user" id="profile-trigger">
+      <img id="user-photo" src="" alt="" class="user-avatar" onerror="this.src='https://ui-avatars.com/api/?background=2D2D2D&color=fff&name=U'"/>
+      <div class="user-info"><div id="user-name" class="user-name">Loading...</div><div id="user-email" class="user-email"></div></div>
     </div>
   </aside>
 
   <main class="main-content" style="max-width:100%;">
     <div class="page-header">
       <h1 class="page-title">Sprint Board</h1>
-      <p class="page-sub">Agile sprint management — drag tasks across columns.</p>
+      <p class="page-sub">Manage sprints and track agile tasks.</p>
     </div>
 
-    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
-      <select id="sprint-select" class="select"><option value="">— Select a Sprint —</option></select>
-      <button class="btn-primary" id="new-sprint-btn">+ New Sprint</button>
-      <button class="btn-secondary" id="add-card-btn">+ Add Task</button>
+    <!-- Tab switcher -->
+    <div style="display:flex;gap:4px;margin-bottom:24px;background:#fff;border:1px solid #E2E2E2;border-radius:10px;padding:4px;width:fit-content;">
+      <button id="tab-list" class="tab-btn active" onclick="switchTab('list')">☰ Sprint List</button>
+      <button id="tab-board" class="tab-btn" onclick="switchTab('board')">⊞ Board View</button>
     </div>
 
-    <div id="sprint-info" class="hidden" style="background:#fff;border:1px solid #E2E2E2;border-radius:12px;padding:14px 20px;margin-bottom:20px;display:none;gap:28px;align-items:center;flex-wrap:wrap;">
-      <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:2px;">Sprint</div><div id="si-name" style="font-size:15px;font-weight:600;"></div></div>
-      <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:2px;">Dates</div><div id="si-dates" style="font-size:13px;"></div></div>
-      <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:2px;">Goal</div><div id="si-goal" style="font-size:13px;color:#6B6B6B;"></div></div>
-      <div style="margin-left:auto;"><span id="si-status" class="priority-badge p3"></span></div>
-    </div>
-
-    <div class="sprint-board">
-      <div class="sprint-col" id="col-todo" ondragover="event.preventDefault()" ondrop="drop(event,'todo')">
-        <div class="sprint-col-title">To Do <span id="cnt-todo" style="font-weight:400;color:#bbb;margin-left:4px;">0</span></div>
-        <div id="cards-todo"></div>
+    <!-- ── SPRINT LIST VIEW ── -->
+    <div id="view-list">
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+        <button class="btn-primary" id="new-sprint-btn">+ New Sprint</button>
       </div>
-      <div class="sprint-col" id="col-inprogress" ondragover="event.preventDefault()" ondrop="drop(event,'inprogress')">
-        <div class="sprint-col-title">In Progress <span id="cnt-inprogress" style="font-weight:400;color:#bbb;margin-left:4px;">0</span></div>
-        <div id="cards-inprogress"></div>
+      <div id="sprint-list-container">
+        <p class="empty-state">No sprints yet. Click "+ New Sprint" to create one.</p>
       </div>
-      <div class="sprint-col" id="col-done" ondragover="event.preventDefault()" ondrop="drop(event,'done')">
-        <div class="sprint-col-title">Done <span id="cnt-done" style="font-weight:400;color:#bbb;margin-left:4px;">0</span></div>
-        <div id="cards-done"></div>
+    </div>
+
+    <!-- ── BOARD VIEW ── -->
+    <div id="view-board" class="hidden">
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+        <select id="sprint-select" class="select"><option value="">— Select a Sprint —</option></select>
+        <button class="btn-secondary" id="add-card-btn">+ Add Task</button>
+      </div>
+
+      <div id="sprint-info" style="display:none;background:#fff;border:1px solid #E2E2E2;border-radius:12px;padding:14px 20px;margin-bottom:20px;gap:28px;align-items:center;flex-wrap:wrap;">
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:2px;">Sprint</div><div id="si-name" style="font-size:15px;font-weight:600;"></div></div>
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:2px;">Dates</div><div id="si-dates" style="font-size:13px;"></div></div>
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:2px;">Goal</div><div id="si-goal" style="font-size:13px;color:#6B6B6B;max-width:260px;"></div></div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+          <span id="si-status" class="priority-badge p3"></span>
+          <button class="btn-icon" id="edit-current-sprint">✎ Edit Sprint</button>
+        </div>
+      </div>
+
+      <div class="sprint-board">
+        <div class="sprint-col" ondragover="event.preventDefault()" ondrop="drop(event,'todo')">
+          <div class="sprint-col-title">To Do <span id="cnt-todo" style="font-weight:400;color:#bbb;margin-left:4px;">0</span></div>
+          <div id="cards-todo"></div>
+        </div>
+        <div class="sprint-col" ondragover="event.preventDefault()" ondrop="drop(event,'inprogress')">
+          <div class="sprint-col-title">In Progress <span id="cnt-inprogress" style="font-weight:400;color:#bbb;margin-left:4px;">0</span></div>
+          <div id="cards-inprogress"></div>
+        </div>
+        <div class="sprint-col" ondragover="event.preventDefault()" ondrop="drop(event,'done')">
+          <div class="sprint-col-title">Done <span id="cnt-done" style="font-weight:400;color:#bbb;margin-left:4px;">0</span></div>
+          <div id="cards-done"></div>
+        </div>
       </div>
     </div>
   </main>
 </div>
 
-<!-- New Sprint Modal -->
+<!-- New / Edit Sprint Modal -->
 <div id="sprint-modal" class="modal-overlay hidden">
   <div class="modal">
-    <h2 class="modal-title">New Sprint</h2>
+    <h2 class="modal-title" id="sprint-modal-title">New Sprint</h2>
     <div class="form-group"><label class="label">Sprint name *</label><input type="text" id="s-name" class="input" style="width:100%;" placeholder="e.g. Sprint 1 — Onboarding"/></div>
     <div class="form-group"><label class="label">Sprint goal</label><input type="text" id="s-goal" class="input" style="width:100%;" placeholder="What will this sprint achieve?"/></div>
     <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div><label class="label">Start date</label><input type="date" id="s-start" class="input" style="width:100%;"/></div>
       <div><label class="label">End date</label><input type="date" id="s-end" class="input" style="width:100%;"/></div>
     </div>
+    <div class="form-group">
+      <label class="label">Status</label>
+      <select id="s-status" class="select" style="width:100%;">
+        <option value="planning">Planning</option>
+        <option value="active">Active</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
     <div class="modal-actions">
       <button class="btn-secondary" id="cancel-sprint">Cancel</button>
-      <button class="btn-primary" id="save-sprint">Create Sprint</button>
+      <button class="btn-primary" id="save-sprint">Save Sprint</button>
     </div>
   </div>
 </div>
@@ -89,8 +117,11 @@
     <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
       <div><label class="label">Priority</label>
         <select id="c-prio" class="select" style="width:100%;">
-          <option value="1">P1 — Urgent</option><option value="2">P2 — High</option>
-          <option value="3" selected>P3 — Medium</option><option value="4">P4 — Low</option><option value="5">P5 — Someday</option>
+          <option value="1">P1 — Urgent</option>
+          <option value="2">P2 — High</option>
+          <option value="3" selected>P3 — Medium</option>
+          <option value="4">P4 — Low</option>
+          <option value="5">P5 — Someday</option>
         </select>
       </div>
       <div><label class="label">Est. hours</label><input type="number" id="c-hours" class="input" style="width:100%;" value="1" min="0.5" step="0.5"/></div>
@@ -103,124 +134,254 @@
   </div>
 </div>
 
+<style>
+.tab-btn {
+  padding: 6px 16px; background: none; border: none;
+  border-radius: 7px; font-size: 13px; font-family: inherit;
+  cursor: pointer; color: #6B6B6B; font-weight: 400; transition: all .15s;
+}
+.tab-btn.active { background: #0F0F0F; color: #fff; font-weight: 500; }
+</style>
+
 <script type="module">
-  import { db, showToast, renderUser, openProfileModal } from "../js/db.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  let currentSprintId = null;
-  renderUser();
-  document.getElementById("user-avatar").onclick = () => openProfileModal();
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDCvcPiEW9zMs2hJSRXtF5lYtUyCMoRIlE",
+    authDomain:        "estreccella.firebaseapp.com",
+    projectId:         "estreccella",
+    storageBucket:     "estreccella.firebasestorage.app",
+    messagingSenderId: "403183247546",
+    appId:             "1:403183247546:web:4764761e002cc1de602283"
+  };
 
-  function loadSprints() {
-    const sprints = db.getAll("sprints").sort((a,b) => (b.createdAt||"").localeCompare(a.createdAt||""));
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  let uid = null, currentSprintId = null, editingSprintId = null, allSprints = [];
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) { window.location.href = "../index.html"; return; }
+    uid = user.uid;
+    document.getElementById("user-photo").src         = user.photoURL || "";
+    document.getElementById("user-name").textContent  = user.displayName || "";
+    document.getElementById("user-email").textContent = user.email || "";
+    loadSprints();
+  });
+
+  // ── TAB SWITCHER ────────────────────────────────────
+  window.switchTab = (tab) => {
+    document.getElementById("view-list").classList.toggle("hidden", tab !== "list");
+    document.getElementById("view-board").classList.toggle("hidden", tab !== "board");
+    document.getElementById("tab-list").classList.toggle("active", tab === "list");
+    document.getElementById("tab-board").classList.toggle("active", tab === "board");
+    if (tab === "board") populateBoardSelect();
+  };
+
+  // ── LOAD SPRINTS ─────────────────────────────────────
+  async function loadSprints() {
+    const snap = await getDocs(query(collection(db,"sprints"), where("ownerId","==",uid)));
+    allSprints = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderSprintList();
+    populateBoardSelect();
+  }
+
+  // ── SPRINT LIST ───────────────────────────────────────
+  function renderSprintList() {
+    const container = document.getElementById("sprint-list-container");
+    if (!allSprints.length) { container.innerHTML = '<p class="empty-state">No sprints yet. Click "+ New Sprint" to create one.</p>'; return; }
+    const now = new Date();
+    container.innerHTML = allSprints.map(s => {
+      const isActive   = s.status === "active";
+      const isComplete = s.status === "completed";
+      const isOverdue  = s.endDate && new Date(s.endDate) < now && s.status !== "completed";
+      const statusColor = isComplete ? "status-active" : isActive ? "status-admin" : "status-archived";
+      return `
+        <div class="sprint-list-item">
+          <div class="sprint-list-info">
+            <div class="sprint-list-name">
+              ${s.name}
+              <span class="status-badge ${statusColor}" style="margin-left:8px;">${s.status||"planning"}</span>
+              ${isOverdue ? '<span class="status-badge" style="background:#ffeaea;color:#c62828;margin-left:4px;">⚠ Overdue</span>' : ""}
+            </div>
+            <div class="sprint-list-meta">
+              📅 ${s.startDate||"?"} → ${s.endDate||"?"}
+              ${s.goal ? ` · 🎯 ${s.goal}` : ""}
+            </div>
+          </div>
+          <div class="sprint-list-actions">
+            <button class="btn-secondary" onclick="openBoardFor('${s.id}')">View Board →</button>
+            <button class="btn-icon" onclick="openEditSprint('${s.id}')">✎ Edit</button>
+            <button class="btn-danger" onclick="deleteSprint('${s.id}')">✕</button>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  // ── BOARD SELECT ──────────────────────────────────────
+  function populateBoardSelect() {
     const sel = document.getElementById("sprint-select");
     sel.innerHTML = '<option value="">— Select a Sprint —</option>';
-    sprints.forEach(s => {
+    allSprints.forEach(s => {
       const o = document.createElement("option");
       o.value = s.id; o.textContent = s.name;
       sel.appendChild(o);
     });
-    if (sprints.length) { sel.value = sprints[0].id; loadBoard(sprints[0].id); }
+    if (currentSprintId) { sel.value = currentSprintId; loadBoard(currentSprintId); }
+    else if (allSprints.length) { sel.value = allSprints[0].id; loadBoard(allSprints[0].id); }
   }
 
-  document.getElementById("sprint-select").onchange = (e) => {
-    if (e.target.value) loadBoard(e.target.value);
+  document.getElementById("sprint-select").onchange = (e) => { if (e.target.value) loadBoard(e.target.value); };
+
+  // Open board from list view
+  window.openBoardFor = (id) => {
+    currentSprintId = id;
+    switchTab("board");
   };
 
-  function loadBoard(sprintId) {
+  // ── LOAD BOARD ────────────────────────────────────────
+  async function loadBoard(sprintId) {
     currentSprintId = sprintId;
-    const sprint = db.get("sprints", sprintId);
+    const sprint = allSprints.find(s => s.id === sprintId);
     if (!sprint) return;
 
     const info = document.getElementById("sprint-info");
-    info.classList.remove("hidden"); info.style.display = "flex";
-    document.getElementById("si-name").textContent  = sprint.name;
-    document.getElementById("si-dates").textContent = `${sprint.startDate||"?"} → ${sprint.endDate||"?"}`;
-    document.getElementById("si-goal").textContent  = sprint.goal || "No goal set";
+    info.style.display = "flex";
+    document.getElementById("si-name").textContent   = sprint.name;
+    document.getElementById("si-dates").textContent  = `${sprint.startDate||"?"} → ${sprint.endDate||"?"}`;
+    document.getElementById("si-goal").textContent   = sprint.goal || "No goal set";
     document.getElementById("si-status").textContent = sprint.status || "planning";
 
-    const tasks = db.getAll("tasks", t => t.sprintId === sprintId);
+    const snap  = await getDocs(query(collection(db,"tasks"), where("ownerId","==",uid), where("sprintId","==",sprintId)));
+    const tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     const now   = new Date();
 
     ["todo","inprogress","done"].forEach(status => {
       const col = tasks.filter(t => t.status === status);
       document.getElementById(`cnt-${status}`).textContent = col.length;
-      document.getElementById(`cards-${status}`).innerHTML = col.length ? col.map(t => {
-        const overdue = t.dueDate && new Date(t.dueDate) < now && t.status !== "done";
-        return `
-          <div class="sprint-card" draggable="true" id="sc-${t.id}"
-            ondragstart="window._drag='${t.id}'">
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-              <span class="priority-badge p${t.priority}">P${t.priority}</span>
-              <button onclick="delCard('${t.id}')" style="background:none;border:none;cursor:pointer;color:#bbb;font-size:12px;">✕</button>
-            </div>
-            <div style="font-size:13px;font-weight:500;margin-bottom:4px;">${t.title}</div>
-            ${t.description ? `<div style="font-size:11px;color:#6B6B6B;margin-bottom:6px;">${t.description}</div>` : ""}
-            <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:10px;color:#aaa;">
-              ${t.estimatedHours ? `<span>⏱ ${t.estimatedHours}h</span>` : ""}
-              ${t.dueDate ? `<span style="color:${overdue?"#E53935":"#aaa"}">${overdue?"⚠ ":""}${t.dueDate}</span>` : ""}
-            </div>
-          </div>`;
-      }).join("") : `<div style="font-size:12px;color:#bbb;text-align:center;padding:24px 0;">No tasks</div>`;
+      document.getElementById(`cards-${status}`).innerHTML = col.length
+        ? col.map(t => {
+            const overdue = t.dueDate && new Date(t.dueDate) < now && t.status !== "done";
+            return `
+              <div class="sprint-card" draggable="true" ondragstart="window._drag='${t.id}'">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                  <span class="priority-badge p${t.priority}">P${t.priority}</span>
+                  <button onclick="delCard('${t.id}')" style="background:none;border:none;cursor:pointer;color:#bbb;font-size:12px;">✕</button>
+                </div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:4px;">${t.title}</div>
+                ${t.description?`<div style="font-size:11px;color:#6B6B6B;margin-bottom:6px;">${t.description}</div>`:""}
+                <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:10px;color:#aaa;">
+                  ${t.estimatedHours?`<span>⏱ ${t.estimatedHours}h</span>`:""}
+                  ${t.dueDate?`<span style="color:${overdue?"#E53935":"#aaa"}">${overdue?"⚠ ":""}${t.dueDate}</span>`:""}
+                </div>
+              </div>`;
+          }).join("")
+        : `<div style="font-size:12px;color:#bbb;text-align:center;padding:24px 0;">No tasks</div>`;
     });
   }
 
-  window.drop = (e, status) => {
+  window.drop = async (e, status) => {
     e.preventDefault();
-    const id = window._drag; if (!id || !currentSprintId) return;
-    db.update("tasks", id, { status });
+    const id = window._drag; if (!id||!currentSprintId) return;
+    await updateDoc(doc(db,"tasks",id),{status});
     window._drag = null;
     loadBoard(currentSprintId);
   };
 
-  window.delCard = (id) => {
+  window.delCard = async (id) => {
     if (!confirm("Remove this task?")) return;
-    db.delete("tasks", id);
+    await deleteDoc(doc(db,"tasks",id));
     loadBoard(currentSprintId);
   };
 
-  // New sprint
-  document.getElementById("new-sprint-btn").onclick = () => document.getElementById("sprint-modal").classList.remove("hidden");
-  document.getElementById("cancel-sprint").onclick  = () => document.getElementById("sprint-modal").classList.add("hidden");
-  document.getElementById("save-sprint").onclick = () => {
-    const name = document.getElementById("s-name").value.trim();
-    if (!name) { alert("Sprint name is required"); return; }
-    const sprint = db.add("sprints", {
-      name, goal: document.getElementById("s-goal").value.trim(),
-      startDate: document.getElementById("s-start").value || null,
-      endDate:   document.getElementById("s-end").value   || null,
-      status: "planning",
-    });
-    document.getElementById("sprint-modal").classList.add("hidden");
-    ["s-name","s-goal","s-start","s-end"].forEach(id => document.getElementById(id).value = "");
-    loadSprints();
-    showToast("Sprint created!");
+  // Edit current sprint from board view
+  document.getElementById("edit-current-sprint").onclick = () => {
+    if (currentSprintId) openEditSprint(currentSprintId);
   };
 
-  // Add task
+  // ── NEW SPRINT ────────────────────────────────────────
+  document.getElementById("new-sprint-btn").onclick = () => {
+    editingSprintId = null;
+    document.getElementById("sprint-modal-title").textContent = "New Sprint";
+    ["s-name","s-goal","s-start","s-end"].forEach(id => document.getElementById(id).value="");
+    document.getElementById("s-status").value = "planning";
+    document.getElementById("sprint-modal").classList.remove("hidden");
+  };
+
+  // ── EDIT SPRINT ───────────────────────────────────────
+  window.openEditSprint = (id) => {
+    editingSprintId = id;
+    const s = allSprints.find(x => x.id === id);
+    if (!s) return;
+    document.getElementById("sprint-modal-title").textContent = "Edit Sprint";
+    document.getElementById("s-name").value   = s.name   || "";
+    document.getElementById("s-goal").value   = s.goal   || "";
+    document.getElementById("s-start").value  = s.startDate || "";
+    document.getElementById("s-end").value    = s.endDate   || "";
+    document.getElementById("s-status").value = s.status    || "planning";
+    document.getElementById("sprint-modal").classList.remove("hidden");
+  };
+
+  document.getElementById("cancel-sprint").onclick = () => document.getElementById("sprint-modal").classList.add("hidden");
+
+  document.getElementById("save-sprint").onclick = async () => {
+    const name = document.getElementById("s-name").value.trim();
+    if (!name) { alert("Sprint name is required"); return; }
+    const data = {
+      name, goal: document.getElementById("s-goal").value.trim(),
+      startDate: document.getElementById("s-start").value||null,
+      endDate:   document.getElementById("s-end").value||null,
+      status:    document.getElementById("s-status").value,
+    };
+    if (editingSprintId) {
+      await updateDoc(doc(db,"sprints",editingSprintId), { ...data, updatedAt: serverTimestamp() });
+      showToast("Sprint updated!");
+    } else {
+      await addDoc(collection(db,"sprints"), { ...data, ownerId: uid, createdAt: serverTimestamp() });
+      showToast("Sprint created!");
+    }
+    document.getElementById("sprint-modal").classList.add("hidden");
+    editingSprintId = null;
+    loadSprints();
+  };
+
+  // ── DELETE SPRINT ─────────────────────────────────────
+  window.deleteSprint = async (id) => {
+    if (!confirm("Delete this sprint? Tasks inside will remain but lose the sprint link.")) return;
+    await deleteDoc(doc(db,"sprints",id));
+    showToast("Sprint deleted");
+    loadSprints();
+  };
+
+  // ── ADD TASK ──────────────────────────────────────────
   document.getElementById("add-card-btn").onclick = () => {
     if (!currentSprintId) { alert("Please select a sprint first"); return; }
     document.getElementById("card-modal").classList.remove("hidden");
   };
   document.getElementById("cancel-card").onclick = () => document.getElementById("card-modal").classList.add("hidden");
-  document.getElementById("save-card").onclick = () => {
+  document.getElementById("save-card").onclick = async () => {
     const title = document.getElementById("c-title").value.trim();
     if (!title) { alert("Task title is required"); return; }
-    db.add("tasks", {
+    await addDoc(collection(db,"tasks"), {
       title, description: document.getElementById("c-desc").value.trim(),
       priority: parseInt(document.getElementById("c-prio").value),
-      estimatedHours: parseFloat(document.getElementById("c-hours").value) || 1,
-      dueDate: document.getElementById("c-due").value || null,
-      status: "todo", sprintId: currentSprintId,
+      estimatedHours: parseFloat(document.getElementById("c-hours").value)||1,
+      dueDate: document.getElementById("c-due").value||null,
+      status: "todo", sprintId: currentSprintId, ownerId: uid, createdAt: serverTimestamp(),
     });
     document.getElementById("card-modal").classList.add("hidden");
-    ["c-title","c-desc","c-due"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("c-prio").value = "3";
-    document.getElementById("c-hours").value = "1";
+    ["c-title","c-desc","c-due"].forEach(id=>document.getElementById(id).value="");
+    document.getElementById("c-prio").value="3"; document.getElementById("c-hours").value="1";
     loadBoard(currentSprintId);
-    showToast("Task added!");
   };
 
-  loadSprints();
+  function showToast(msg) {
+    let t=document.querySelector(".toast");
+    if (!t) { t=document.createElement("div"); t.className="toast"; document.body.appendChild(t); }
+    t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),3000);
+  }
 </script>
 </body>
 </html>

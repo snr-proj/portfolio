@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Management — Estreccella</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+<div id="app" class="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span class="logo-icon">✦</span><span class="logo-text">Estreccella</span></div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Workspace</div>
+      <a href="../index.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="../pages/calendar.html" class="nav-item"><span class="nav-icon">◫</span> Calendar</a>
+      <a href="../pages/projects.html" class="nav-item"><span class="nav-icon">◈</span> Projects & Timeline</a>
+      <a href="../pages/sprint.html" class="nav-item"><span class="nav-icon">◉</span> Sprint Board</a>
+      <a href="../pages/meetings.html" class="nav-item"><span class="nav-icon">◎</span> Meetings</a>
+      <a href="../pages/docs.html" class="nav-item"><span class="nav-icon">◻</span> Documents</a>
+      <div class="nav-section-label">Admin</div>
+      <a href="users.html" class="nav-item active"><span class="nav-icon">👥</span> User Management</a>
+    </nav>
+    <div class="sidebar-user" id="profile-trigger" style="cursor:default;">
+      <img id="user-photo" src="" alt="" class="user-avatar" onerror="this.src='https://ui-avatars.com/api/?background=2D2D2D&color=fff&name=A'"/>
+      <div class="user-info"><div id="user-name" class="user-name">Loading...</div><div id="user-email" class="user-email"></div></div>
+      <span class="user-role-badge role-admin">Admin</span>
+    </div>
+  </aside>
+
+  <main class="main-content" style="max-width:100%;">
+    <div class="page-header">
+      <h1 class="page-title">User Management</h1>
+      <p class="page-sub">View, manage roles, and archive user accounts.</p>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="stats-row" style="grid-template-columns:repeat(3,1fr);max-width:540px;margin-bottom:28px;">
+      <div class="stat-card"><div class="stat-num blue" id="stat-users">0</div><div class="stat-label">Total Users</div></div>
+      <div class="stat-card"><div class="stat-num green" id="stat-active">0</div><div class="stat-label">Active</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-archived">0</div><div class="stat-label">Archived</div></div>
+    </div>
+
+    <!-- Filters -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+      <input type="text" id="search-users" class="input" placeholder="Search by name or email..." style="max-width:260px;"/>
+      <select id="filter-role" class="select">
+        <option value="">All roles</option>
+        <option value="admin">Admin</option>
+        <option value="user">User</option>
+      </select>
+      <select id="filter-status" class="select">
+        <option value="">All status</option>
+        <option value="active">Active</option>
+        <option value="archived">Archived</option>
+      </select>
+    </div>
+
+    <!-- Users table -->
+    <div style="background:#fff;border:1px solid #E2E2E2;border-radius:12px;overflow:hidden;">
+      <table class="admin-table" id="users-table">
+        <thead>
+          <tr>
+            <th style="width:44px;"></th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Job Title</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Last Login</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="users-tbody">
+          <tr><td colspan="8" style="text-align:center;color:#6B6B6B;padding:32px;">Loading users...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- Edit User Modal -->
+<div id="edit-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <h2 class="modal-title">Edit User</h2>
+    <div id="edit-user-info" style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:12px;background:var(--offwhite);border-radius:8px;">
+      <img id="edit-avatar" src="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;"/>
+      <div><div id="edit-name-display" style="font-weight:600;"></div><div id="edit-email-display" style="font-size:12px;color:#6B6B6B;"></div></div>
+    </div>
+    <div class="form-group">
+      <label class="label">Role</label>
+      <select id="edit-role" class="select" style="width:100%;">
+        <option value="user">User — standard access</option>
+        <option value="admin">Admin — full access + user management</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="label">Account Status</label>
+      <select id="edit-status" class="select" style="width:100%;">
+        <option value="active">Active</option>
+        <option value="archived">Archived (cannot log in)</option>
+      </select>
+    </div>
+    <div id="edit-note" style="font-size:12px;color:#6B6B6B;background:#fffde7;padding:10px 12px;border-radius:8px;margin-bottom:4px;">
+      ⚠ Archiving a user prevents them from accessing the app but retains their data.
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="cancel-edit">Cancel</button>
+      <button class="btn-primary" id="save-edit">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, getDocs, getDoc, updateDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDCvcPiEW9zMs2hJSRXtF5lYtUyCMoRIlE",
+    authDomain:        "estreccella.firebaseapp.com",
+    projectId:         "estreccella",
+    storageBucket:     "estreccella.firebasestorage.app",
+    messagingSenderId: "403183247546",
+    appId:             "1:403183247546:web:4764761e002cc1de602283"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  let uid = null, allUsers = [], editingUid = null;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "../index.html"; return; }
+    uid = user.uid;
+
+    // Check admin role
+    const myDoc = await getDoc(doc(db,"users",uid));
+    if (!myDoc.exists() || myDoc.data().role !== "admin") {
+      alert("Access denied. Admins only.");
+      window.location.href = "../index.html"; return;
+    }
+
+    document.getElementById("user-photo").src         = user.photoURL || "";
+    document.getElementById("user-name").textContent  = user.displayName || "";
+    document.getElementById("user-email").textContent = user.email || "";
+    loadUsers();
+  });
+
+  async function loadUsers() {
+    const snap = await getDocs(collection(db,"users"));
+    allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderTable(allUsers);
+    document.getElementById("stat-users").textContent    = allUsers.length;
+    document.getElementById("stat-active").textContent   = allUsers.filter(u=>u.status!=="archived").length;
+    document.getElementById("stat-archived").textContent = allUsers.filter(u=>u.status==="archived").length;
+  }
+
+  function renderTable(users) {
+    const tbody = document.getElementById("users-tbody");
+    if (!users.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#6B6B6B;padding:32px;">No users found.</td></tr>'; return; }
+    tbody.innerHTML = users.map(u => {
+      const isMe      = u.id === uid;
+      const archived  = u.status === "archived";
+      const lastLogin = u.lastLogin?.toDate ? u.lastLogin.toDate().toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}) : "—";
+      const initials  = (u.displayName||"U").split(" ").map(n=>n[0]).join("").substring(0,2).toUpperCase();
+      return `
+        <tr style="${archived?"opacity:.6":""}">
+          <td>
+            <img src="${u.photoURL||`https://ui-avatars.com/api/?background=2D2D2D&color=fff&name=${encodeURIComponent(initials)}`}"
+              style="width:32px;height:32px;border-radius:50%;object-fit:cover;"/>
+          </td>
+          <td>
+            <div style="font-weight:500;">${u.displayName||"—"} ${isMe?"<span style='font-size:10px;color:#aaa;'>(you)</span>":""}</div>
+            <div style="font-size:11px;color:#aaa;">${u.department||""}</div>
+          </td>
+          <td style="font-size:12px;color:#6B6B6B;">${u.email||"—"}</td>
+          <td style="font-size:12px;color:#6B6B6B;">${u.jobTitle||"—"}</td>
+          <td><span class="status-badge ${u.role==="admin"?"status-admin":"status-active"}">${u.role||"user"}</span></td>
+          <td><span class="status-badge ${archived?"status-archived":"status-active"}">${u.status||"active"}</span></td>
+          <td style="font-size:11px;color:#aaa;">${lastLogin}</td>
+          <td>
+            ${!isMe ? `<button class="btn-icon" onclick="openEdit('${u.id}')">✎ Edit</button>` : `<span style="font-size:11px;color:#aaa;">—</span>`}
+          </td>
+        </tr>`;
+    }).join("");
+  }
+
+  // Search & filter
+  function applyFilters() {
+    const search = document.getElementById("search-users").value.toLowerCase();
+    const role   = document.getElementById("filter-role").value;
+    const status = document.getElementById("filter-status").value;
+    const filtered = allUsers.filter(u => {
+      const matchSearch = (u.displayName||"").toLowerCase().includes(search) || (u.email||"").toLowerCase().includes(search);
+      const matchRole   = !role   || u.role   === role;
+      const matchStatus = !status || (status === "active" ? u.status !== "archived" : u.status === "archived");
+      return matchSearch && matchRole && matchStatus;
+    });
+    renderTable(filtered);
+  }
+  document.getElementById("search-users").oninput   = applyFilters;
+  document.getElementById("filter-role").onchange   = applyFilters;
+  document.getElementById("filter-status").onchange = applyFilters;
+
+  // Edit modal
+  window.openEdit = (id) => {
+    editingUid = id;
+    const u = allUsers.find(x => x.id === id);
+    if (!u) return;
+    document.getElementById("edit-avatar").src         = u.photoURL || `https://ui-avatars.com/api/?background=2D2D2D&color=fff&name=${encodeURIComponent(u.displayName||"U")}`;
+    document.getElementById("edit-name-display").textContent  = u.displayName || "—";
+    document.getElementById("edit-email-display").textContent = u.email || "—";
+    document.getElementById("edit-role").value   = u.role   || "user";
+    document.getElementById("edit-status").value = u.status || "active";
+    document.getElementById("edit-modal").classList.remove("hidden");
+  };
+
+  document.getElementById("cancel-edit").onclick = () => document.getElementById("edit-modal").classList.add("hidden");
+
+  document.getElementById("save-edit").onclick = async () => {
+    if (!editingUid) return;
+    const role   = document.getElementById("edit-role").value;
+    const status = document.getElementById("edit-status").value;
+    await updateDoc(doc(db,"users",editingUid), { role, status });
+    document.getElementById("edit-modal").classList.add("hidden");
+    showToast("User updated!");
+    loadUsers();
+  };
+
+  function showToast(msg) {
+    let t=document.querySelector(".toast");
+    if (!t) { t=document.createElement("div"); t.className="toast"; document.body.appendChild(t); }
+    t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),3000);
+  }
+</script>
+</body>
+</html>

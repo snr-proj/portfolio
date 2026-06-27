@@ -9,27 +9,24 @@
 </head>
 <body>
 <div id="app" class="app">
-
   <aside class="sidebar">
     <div class="sidebar-logo"><span class="logo-icon">✦</span><span class="logo-text">Estreccella</span></div>
     <nav class="sidebar-nav">
+      <div class="nav-section-label">Workspace</div>
       <a href="../index.html" class="nav-item"><span class="nav-icon">⊞</span> Dashboard</a>
       <a href="calendar.html" class="nav-item"><span class="nav-icon">◫</span> Calendar</a>
       <a href="projects.html" class="nav-item"><span class="nav-icon">◈</span> Projects & Timeline</a>
-      <a href="sprint.html" class="nav-item"><span class="nav-icon">⚡</span> Sprint Board</a>
+      <a href="sprint.html" class="nav-item"><span class="nav-icon">◉</span> Sprint Board</a>
       <a href="meetings.html" class="nav-item"><span class="nav-icon">◎</span> Meetings</a>
       <a href="docs.html" class="nav-item active"><span class="nav-icon">◻</span> Documents</a>
     </nav>
     <div class="sidebar-user">
-      <div class="user-avatar" id="user-avatar" title="Edit profile"></div>
-      <div class="user-info"><div id="user-name" class="user-name">You</div><div id="user-email" class="user-email"></div></div>
-      <button class="logout-btn" onclick="window.location='../index.html'" title="Home">↩</button>
+      <img id="user-photo" src="" alt="" class="user-avatar" onerror="this.src='https://ui-avatars.com/api/?background=2D2D2D&color=fff&name=U'"/>
+      <div class="user-info"><div id="user-name" class="user-name">Loading...</div><div id="user-email" class="user-email"></div></div>
     </div>
   </aside>
 
   <main class="main-content">
-
-    <!-- LIST VIEW -->
     <div id="list-view">
       <div class="page-header">
         <h1 class="page-title">Documents</h1>
@@ -40,12 +37,11 @@
         <input type="text" id="search-docs" class="input" placeholder="Search documents..." style="max-width:240px;"/>
       </div>
       <div id="tag-filters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;"></div>
-      <div id="doc-list"><p class="empty-state">No documents yet. Click "+ New Document" to start.</p></div>
+      <div id="doc-list"><p class="empty-state">No documents yet.</p></div>
     </div>
 
-    <!-- EDITOR VIEW -->
     <div id="editor-view" class="hidden">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
         <button class="btn-secondary" id="back-btn">← Back</button>
         <h1 class="page-title" style="flex:1;" id="editor-heading">Document</h1>
         <button class="btn-danger" id="delete-doc-btn">Delete</button>
@@ -60,65 +56,87 @@
         </div>
       </div>
 
-      <!-- Editor toolbar -->
       <div style="background:#fff;border:1px solid #E2E2E2;border-radius:12px 12px 0 0;border-bottom:none;padding:8px 14px;display:flex;gap:4px;flex-wrap:wrap;">
-        <button onclick="fmt('bold')" class="tb-btn"><b>B</b></button>
-        <button onclick="fmt('italic')" class="tb-btn"><i>I</i></button>
-        <button onclick="fmt('underline')" class="tb-btn"><u>U</u></button>
-        <button onclick="fmt('strikeThrough')" class="tb-btn"><s>S</s></button>
-        <span style="width:1px;background:#E2E2E2;margin:0 6px;"></span>
-        <button onclick="insH2()" class="tb-btn">H2</button>
-        <button onclick="insH3()" class="tb-btn">H3</button>
-        <button onclick="insBullet()" class="tb-btn">• List</button>
-        <button onclick="insNumbered()" class="tb-btn">1. List</button>
-        <button onclick="insTodo()" class="tb-btn">☐ Todo</button>
-        <span style="width:1px;background:#E2E2E2;margin:0 6px;"></span>
-        <button onclick="insTable()" class="tb-btn">⊞ Table</button>
-        <button onclick="insCode()" class="tb-btn">{ } Code</button>
-        <button onclick="insHR()" class="tb-btn">— Divider</button>
-        <button onclick="insDate()" class="tb-btn">📅</button>
+        <button onclick="document.execCommand('bold')" class="tb-btn"><b>B</b></button>
+        <button onclick="document.execCommand('italic')" class="tb-btn"><i>I</i></button>
+        <button onclick="document.execCommand('underline')" class="tb-btn"><u>U</u></button>
+        <button onclick="document.execCommand('strikeThrough')" class="tb-btn"><s>S</s></button>
+        <span style="width:1px;background:#E2E2E2;margin:0 4px;"></span>
+        <button onclick="insEl('<h2 style=\'font-size:18px;font-weight:600;margin:16px 0 6px;\'>Heading 2</h2>')" class="tb-btn">H2</button>
+        <button onclick="insEl('<h3 style=\'font-size:15px;font-weight:600;margin:12px 0 4px;\'>Heading 3</h3>')" class="tb-btn">H3</button>
+        <button onclick="insEl('<ul style=\'padding-left:20px;\'><li>Item</li></ul>')" class="tb-btn">• List</button>
+        <button onclick="insEl('<ol style=\'padding-left:20px;\'><li>Item</li></ol>')" class="tb-btn">1. List</button>
+        <button onclick="insEl('<div>☐ Task item</div>')" class="tb-btn">☐ Todo</button>
+        <span style="width:1px;background:#E2E2E2;margin:0 4px;"></span>
+        <button onclick="insEl('<table style=\'border-collapse:collapse;width:100%;margin:12px 0;\'><tr><th style=\'border:1px solid #E2E2E2;padding:8px;background:#F7F7F5;\'>Column 1</th><th style=\'border:1px solid #E2E2E2;padding:8px;background:#F7F7F5;\'>Column 2</th></tr><tr><td style=\'border:1px solid #E2E2E2;padding:8px;\'>Cell</td><td style=\'border:1px solid #E2E2E2;padding:8px;\'>Cell</td></tr></table>')" class="tb-btn">⊞ Table</button>
+        <button onclick="insEl('<code style=\'background:#F7F7F5;padding:2px 6px;border-radius:4px;font-family:monospace;\'>code</code>')" class="tb-btn">{ } Code</button>
+        <button onclick="insEl('<hr style=\'border:none;border-top:1px solid #E2E2E2;margin:16px 0;\'/>')" class="tb-btn">— Line</button>
+        <button onclick="insDate()" class="tb-btn">📅 Date</button>
       </div>
       <div id="d-content" class="editor-area" contenteditable="true"
         style="border-radius:0 0 12px 12px;min-height:400px;"
-        placeholder="Start writing your document...&#10;&#10;Use the toolbar above for formatting.">
+        placeholder="Start writing your document...">
       </div>
 
-      <!-- Attachments stored as data URLs -->
       <div style="margin-top:20px;">
-        <label class="label">Attachments <span style="font-weight:400;color:#aaa;font-size:10px;">(stored locally in browser)</span></label>
+        <label class="label">Attachments</label>
         <div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap;">
-          <label class="btn-secondary" style="cursor:pointer;">
-            📎 Attach file
-            <input type="file" id="d-attach" multiple style="display:none;"/>
-          </label>
+          <label class="btn-secondary" style="cursor:pointer;">📎 Attach file<input type="file" id="d-attach" multiple style="display:none;"/></label>
           <div id="d-attach-list" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
         </div>
       </div>
     </div>
-
   </main>
 </div>
 
 <script type="module">
-  import { db, showToast, renderUser, openProfileModal } from "../js/db.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-  let currentDocId = null, pendingFiles = [], attachments = [], allDocs = [];
-  renderUser();
-  document.getElementById("user-avatar").onclick = () => openProfileModal();
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDCvcPiEW9zMs2hJSRXtF5lYtUyCMoRIlE",
+    authDomain:        "estreccella.firebaseapp.com",
+    projectId:         "estreccella",
+    storageBucket:     "estreccella.firebasestorage.app",
+    messagingSenderId: "403183247546",
+    appId:             "1:403183247546:web:4764761e002cc1de602283"
+  };
 
-  function loadDocs() {
-    allDocs = db.getAll("documents").sort((a,b) => (b.updatedAt||"").localeCompare(a.updatedAt||""));
-    renderDocs(allDocs);
-    renderTagFilters(allDocs);
+  const app     = initializeApp(firebaseConfig);
+  const auth    = getAuth(app);
+  const db      = getFirestore(app);
+  const storage = getStorage(app);
+  let uid = null, currentDocId = null, pendingFiles = [], attachments = [], allDocs = [];
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) { window.location.href = "../index.html"; return; }
+    uid = user.uid;
+    document.getElementById("user-photo").src         = user.photoURL || "";
+    document.getElementById("user-name").textContent  = user.displayName || "";
+    document.getElementById("user-email").textContent = user.email || "";
+    loadDocs();
+  });
+
+  async function loadDocs() {
+    try {
+      const snap = await getDocs(query(collection(db,"documents"), where("ownerId","==",uid), orderBy("updatedAt","desc")));
+      allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch {
+      const snap = await getDocs(query(collection(db,"documents"), where("ownerId","==",uid)));
+      allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    renderDocs(allDocs); renderTagFilters(allDocs);
   }
 
   function renderDocs(docs) {
     const list = document.getElementById("doc-list");
     if (!docs.length) { list.innerHTML = '<p class="empty-state">No documents yet.</p>'; return; }
     list.innerHTML = docs.map(d => {
-      const updated  = d.updatedAt ? new Date(d.updatedAt).toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}) : "";
-      const preview  = d.content ? d.content.replace(/<[^>]+>/g,"").substring(0,100) + "…" : "Empty document.";
-      const tagsHtml = (d.tags||[]).map(t => `<span class="tag">${t}</span>`).join("");
+      const updated  = d.updatedAt?.toDate ? d.updatedAt.toDate().toLocaleDateString("en-PH",{month:"short",day:"numeric",year:"numeric"}) : "";
+      const preview  = d.content ? d.content.replace(/<[^>]+>/g,"").substring(0,100)+"…" : "Empty document.";
+      const tagsHtml = (d.tags||[]).map(t=>`<span class="tag">${t}</span>`).join("");
       return `
         <div class="doc-card" onclick="openDoc('${d.id}')">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;">
@@ -129,7 +147,7 @@
             </div>
             <div style="text-align:right;flex-shrink:0;margin-left:16px;">
               <div style="font-size:11px;color:#aaa;">${updated}</div>
-              ${d.project ? `<div style="font-size:11px;color:#aaa;margin-top:2px;">📁 ${d.project}</div>` : ""}
+              ${d.project?`<div style="font-size:11px;color:#aaa;margin-top:2px;">📁 ${d.project}</div>`:""}
             </div>
           </div>
         </div>`;
@@ -139,130 +157,91 @@
   function renderTagFilters(docs) {
     const allTags = [...new Set(docs.flatMap(d => d.tags||[]))];
     const el = document.getElementById("tag-filters");
-    if (!allTags.length) { el.innerHTML = ""; return; }
-    el.innerHTML = `<span class="tag" style="cursor:pointer;" onclick="filterTag('')">All</span>` +
-      allTags.map(t => `<span class="tag" style="cursor:pointer;" onclick="filterTag('${t}')">${t}</span>`).join("");
+    if (!allTags.length) { el.innerHTML=""; return; }
+    el.innerHTML = `<span class="tag" style="cursor:pointer;" onclick="filterTag('')">All</span>`
+      + allTags.map(t=>`<span class="tag" style="cursor:pointer;" onclick="filterTag('${t}')">${t}</span>`).join("");
   }
 
-  window.filterTag = (tag) => {
-    renderDocs(tag ? allDocs.filter(d => (d.tags||[]).includes(tag)) : allDocs);
-  };
+  window.filterTag = (tag) => renderDocs(tag ? allDocs.filter(d=>(d.tags||[]).includes(tag)) : allDocs);
 
   document.getElementById("search-docs").oninput = (e) => {
     const q = e.target.value.toLowerCase();
-    renderDocs(allDocs.filter(d => (d.title||"").toLowerCase().includes(q) || (d.content||"").toLowerCase().includes(q)));
+    renderDocs(allDocs.filter(d=>(d.title||"").toLowerCase().includes(q)||(d.content||"").toLowerCase().includes(q)));
   };
 
-  window.openDoc = function(id) {
+  window.openDoc = (id) => {
     currentDocId = id;
-    const d = allDocs.find(x => x.id === id);
-    if (!d) return;
-    document.getElementById("d-title").value   = d.title || "";
+    const d = allDocs.find(x=>x.id===id); if (!d) return;
+    document.getElementById("d-title").value   = d.title||"";
     document.getElementById("d-tags").value    = (d.tags||[]).join(", ");
-    document.getElementById("d-project").value = d.project || "";
-    document.getElementById("d-content").innerHTML = d.content || "";
-    attachments = d.attachments || []; pendingFiles = [];
+    document.getElementById("d-project").value = d.project||"";
+    document.getElementById("d-content").innerHTML = d.content||"";
+    attachments=d.attachments||[]; pendingFiles=[];
     renderAttachList();
-    document.getElementById("editor-heading").textContent = d.title || "Document";
+    document.getElementById("editor-heading").textContent = d.title||"Document";
     showEditor();
   };
 
-  function showEditor() {
-    document.getElementById("list-view").classList.add("hidden");
-    document.getElementById("editor-view").classList.remove("hidden");
-  }
-  function showList() {
-    document.getElementById("editor-view").classList.add("hidden");
-    document.getElementById("list-view").classList.remove("hidden");
-    currentDocId = null; pendingFiles = []; attachments = [];
-    loadDocs();
-  }
+  function showEditor() { document.getElementById("list-view").classList.add("hidden"); document.getElementById("editor-view").classList.remove("hidden"); }
+  function showList()   { document.getElementById("editor-view").classList.add("hidden"); document.getElementById("list-view").classList.remove("hidden"); currentDocId=null; pendingFiles=[]; attachments=[]; loadDocs(); }
 
   document.getElementById("new-doc-btn").onclick = () => {
-    currentDocId = null; attachments = []; pendingFiles = [];
-    ["d-title","d-tags","d-project"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("d-content").innerHTML = "";
-    document.getElementById("d-attach-list").innerHTML = "";
-    document.getElementById("editor-heading").textContent = "New Document";
+    currentDocId=null; attachments=[]; pendingFiles=[];
+    ["d-title","d-tags","d-project"].forEach(id=>document.getElementById(id).value="");
+    document.getElementById("d-content").innerHTML="";
+    document.getElementById("d-attach-list").innerHTML="";
+    document.getElementById("editor-heading").textContent="New Document";
     showEditor();
   };
 
   document.getElementById("back-btn").onclick = showList;
 
   document.getElementById("save-doc-btn").onclick = async () => {
-    const title   = document.getElementById("d-title").value.trim() || "Untitled";
-    const tagsRaw = document.getElementById("d-tags").value;
-    const tags    = tagsRaw ? tagsRaw.split(",").map(t => t.trim()).filter(Boolean) : [];
-
+    const title = document.getElementById("d-title").value.trim()||"Untitled";
+    const tags  = document.getElementById("d-tags").value.split(",").map(t=>t.trim()).filter(Boolean);
     for (const file of pendingFiles) {
-      const dataUrl = await fileToDataUrl(file);
-      attachments.push({ name: file.name, url: dataUrl });
+      const r=ref(storage,`docs/${uid}/${Date.now()}_${file.name}`);
+      await uploadBytes(r,file);
+      attachments.push({name:file.name,url:await getDownloadURL(r)});
     }
-    pendingFiles = [];
-
+    pendingFiles=[];
     const data = {
-      title, tags,
-      project:     document.getElementById("d-project").value.trim(),
-      content:     document.getElementById("d-content").innerHTML,
-      attachments,
+      title, tags, project: document.getElementById("d-project").value.trim(),
+      content: document.getElementById("d-content").innerHTML,
+      attachments, ownerId:uid, updatedAt:serverTimestamp(),
     };
-
-    if (currentDocId) {
-      db.update("documents", currentDocId, data);
-    } else {
-      const d2 = db.add("documents", data);
-      currentDocId = d2.id;
-    }
+    if (currentDocId) { await updateDoc(doc(db,"documents",currentDocId),data); }
+    else { const r=await addDoc(collection(db,"documents"),{...data,createdAt:serverTimestamp()}); currentDocId=r.id; }
     showToast("Document saved!");
-    document.getElementById("editor-heading").textContent = title;
+    document.getElementById("editor-heading").textContent=title;
   };
 
-  document.getElementById("delete-doc-btn").onclick = () => {
+  document.getElementById("delete-doc-btn").onclick = async () => {
     if (!currentDocId) { showList(); return; }
     if (!confirm("Delete this document?")) return;
-    db.delete("documents", currentDocId);
-    showList();
+    await deleteDoc(doc(db,"documents",currentDocId)); showList();
   };
 
   document.getElementById("d-attach").onchange = (e) => {
-    const files = Array.from(e.target.files);
-    pendingFiles.push(...files);
-    const list = document.getElementById("d-attach-list");
-    files.forEach(f => { const s = document.createElement("span"); s.className = "tag"; s.textContent = "📎 " + f.name; list.appendChild(s); });
-    e.target.value = "";
+    const files=Array.from(e.target.files); pendingFiles.push(...files);
+    const list=document.getElementById("d-attach-list");
+    files.forEach(f=>{ const s=document.createElement("span"); s.className="tag"; s.textContent="📎 "+f.name; list.appendChild(s); });
+    e.target.value="";
   };
 
   function renderAttachList() {
-    document.getElementById("d-attach-list").innerHTML = attachments.map(a =>
-      `<a href="${a.url}" download="${a.name}" class="tag" style="text-decoration:none;">📎 ${a.name}</a>`).join("");
+    document.getElementById("d-attach-list").innerHTML=attachments.map(a=>
+      `<a href="${a.url}" target="_blank" class="tag" style="text-decoration:none;">📎 ${a.name}</a>`).join("");
   }
 
-  function fileToDataUrl(file) {
-    return new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload  = () => res(r.result);
-      r.onerror = rej;
-      r.readAsDataURL(file);
-    });
+  window.insEl   = (html) => { document.getElementById("d-content").focus(); document.execCommand("insertHTML",false,html); };
+  window.insDate = () => { const d=new Date().toLocaleDateString("en-PH",{weekday:"long",year:"numeric",month:"long",day:"numeric"}); document.getElementById("d-content").focus(); document.execCommand("insertHTML",false,`<strong>${d}</strong>`); };
+
+  function showToast(msg) {
+    let t=document.querySelector(".toast");
+    if (!t) { t=document.createElement("div"); t.className="toast"; document.body.appendChild(t); }
+    t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),3000);
   }
-
-  // Toolbar
-  window.fmt         = (cmd) => document.execCommand(cmd, false, null);
-  window.insH2       = () => { document.getElementById("d-content").focus(); document.execCommand("insertHTML",false,"<h2 style='font-size:18px;font-weight:600;margin:16px 0 6px;'>Heading 2</h2>"); };
-  window.insH3       = () => { document.getElementById("d-content").focus(); document.execCommand("insertHTML",false,"<h3 style='font-size:15px;font-weight:600;margin:12px 0 4px;'>Heading 3</h3>"); };
-  window.insBullet   = () => { document.getElementById("d-content").focus(); document.execCommand("insertHTML",false,"<ul style='padding-left:20px;'><li>Item</li></ul>"); };
-  window.insNumbered = () => { document.getElementById("d-content").focus(); document.execCommand("insertHTML",false,"<ol style='padding-left:20px;'><li>Item</li></ol>"); };
-  window.insTodo     = () => { document.getElementById("d-content").focus(); document.execCommand("insertHTML",false,"<div style='display:flex;gap:8px;align-items:center;'>☐ Task item</div>"); };
-  window.insTable    = () => { document.getElementById("d-content").focus(); document.execCommand("insertHTML",false,"<table style='border-collapse:collapse;width:100%;margin:12px 0;'><tr><th style='border:1px solid #E2E2E2;padding:8px;background:#F7F7F5;'>Column 1</th><th style='border:1px solid #E2E2E2;padding:8px;background:#F7F7F5;'>Column 2</th></tr><tr><td style='border:1px solid #E2E2E2;padding:8px;'>Cell</td><td style='border:1px solid #E2E2E2;padding:8px;'>Cell</td></tr></table>"); };
-  window.insCode     = () => { document.getElementById("d-content").focus(); document.execCommand("insertHTML",false,"<code style='background:#F7F7F5;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px;'>code here</code>"); };
-  window.insHR       = () => { document.getElementById("d-content").focus(); document.execCommand("insertHTML",false,"<hr style='border:none;border-top:1px solid #E2E2E2;margin:16px 0;'/>"); };
-  window.insDate     = () => {
-    const d = new Date().toLocaleDateString("en-PH",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
-    document.getElementById("d-content").focus();
-    document.execCommand("insertHTML",false,`<strong>${d}</strong>`);
-  };
-
-  loadDocs();
 </script>
 </body>
 </html>

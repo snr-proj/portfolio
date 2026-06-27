@@ -1,268 +1,518 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Estreccella</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
 
-  <!-- SETUP SCREEN (shown only on first visit) -->
-  <div id="setup-screen" class="setup-screen hidden">
-    <div class="setup-box">
-      <div class="setup-logo">✦</div>
-      <h1 class="setup-title">Estreccella</h1>
-      <p class="setup-sub">Your personal project workspace — let's get you set up.</p>
-      <input type="text" id="setup-name" class="setup-input" placeholder="Your name" maxlength="60"/>
-      <input type="text" id="setup-role" class="setup-input" placeholder="Your role (e.g. Project Manager)" maxlength="80"/>
-      <button class="setup-btn" id="setup-btn">Get Started →</button>
+<!-- ════════════════════════════════════════
+     LOGIN
+════════════════════════════════════════ -->
+<div id="login-screen" class="login-screen">
+  <div class="login-box">
+    <div class="login-logo">✦</div>
+    <h1 class="login-title">Estreccella</h1>
+    <p class="login-sub">Sign in to your workspace</p>
+
+    <button id="btn-google" class="google-btn">
+      <svg width="16" height="16" viewBox="0 0 18 18">
+        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+        <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <div class="login-divider">or continue with email</div>
+
+    <div class="email-form">
+      <div id="name-row" class="hidden">
+        <input type="text" id="inp-name" class="inp" placeholder="Full name"/>
+      </div>
+      <input type="email"    id="inp-email" class="inp" placeholder="Email address"/>
+      <input type="password" id="inp-pass"  class="inp" placeholder="Password (min 6 characters)"/>
+      <button id="btn-email" class="btn-submit">Sign In</button>
+    </div>
+
+    <div class="auth-toggle">
+      <span id="toggle-text">Don't have an account?</span>
+      <a id="toggle-link"> Register</a>
+    </div>
+    <p class="login-hint">Press Enter ↵ to sign in</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     APP
+════════════════════════════════════════ -->
+<div id="app" class="app hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">✦</span> Estreccella
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Workspace</div>
+      <a href="index.html"           class="nav-item active"><span class="nav-icon">⊞</span> Dashboard</a>
+      <a href="pages/calendar.html"  class="nav-item"><span class="nav-icon">◫</span> Calendar</a>
+      <a href="pages/projects.html"  class="nav-item"><span class="nav-icon">◈</span> Projects</a>
+      <a href="pages/sprint.html"    class="nav-item"><span class="nav-icon">◎</span> Sprint Board</a>
+      <a href="pages/meetings.html"  class="nav-item"><span class="nav-icon">◻</span> Meetings</a>
+      <a href="pages/docs.html"      class="nav-item"><span class="nav-icon">◈</span> Documents</a>
+      <div id="admin-nav" class="hidden">
+        <div class="nav-section">Admin</div>
+        <a href="admin/users.html" class="nav-item"><span class="nav-icon">⊹</span> Users</a>
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <!-- FIX: clicking here opens profile panel -->
+      <div class="sidebar-user" id="profile-trigger" title="Click to open profile">
+        <img id="s-avatar" src="" class="user-avatar" alt=""
+          onerror="this.src='https://ui-avatars.com/api/?background=EFEEEB&color=6B6B6B&name=U&size=26'"/>
+        <div class="user-info">
+          <div id="s-name"  class="user-name">—</div>
+          <div id="s-email" class="user-email">—</div>
+        </div>
+        <span id="s-role" class="role-pill role-user">User</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="page-title">Dashboard</div>
+    <div class="page-sub" id="greeting"></div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="st-total">0</div><div class="stat-label">Total Tasks</div></div>
+      <div class="stat-card"><div class="stat-num red"   id="st-overdue">0</div><div class="stat-label">Overdue</div></div>
+      <div class="stat-card"><div class="stat-num amber" id="st-inprog">0</div><div class="stat-label">In Progress</div></div>
+      <div class="stat-card"><div class="stat-num green" id="st-done">0</div><div class="stat-label">Completed</div></div>
+    </div>
+
+    <!-- Quick add -->
+    <div class="block-title">Add Task</div>
+    <div class="quick-add-bar">
+      <input  type="text"   id="t-title" class="notion-input" style="flex:2;min-width:160px;" placeholder="Task title..."/>
+      <select id="t-prio"   class="notion-select">
+        <option value="1">🔴 P1 — Urgent</option>
+        <option value="2">🟠 P2 — High</option>
+        <option value="3" selected>🟡 P3 — Medium</option>
+        <option value="4">🟢 P4 — Low</option>
+        <option value="5">⚪ P5 — Someday</option>
+      </select>
+      <input  type="number" id="t-hrs"   class="notion-input" style="width:70px;flex:none;" placeholder="Hrs" min="0.5" step="0.5" value="1"/>
+      <input  type="date"   id="t-due"   class="notion-input" style="width:140px;flex:none;"/>
+      <button id="btn-add"  class="btn btn-black">+ Add</button>
+    </div>
+
+    <!-- Task list -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+      <div class="block-title" style="margin:0;">All Tasks</div>
+      <div class="filter-bar" style="margin:0;">
+        <span class="filter-label">Filter:</span>
+        <select id="f-status" class="notion-select" style="font-size:12px;padding:5px 8px;">
+          <option value="">All Status</option>
+          <option value="todo">To Do</option>
+          <option value="inprogress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+        <select id="f-prio" class="notion-select" style="font-size:12px;padding:5px 8px;">
+          <option value="">All Priorities</option>
+          <option value="1">P1 — Urgent</option>
+          <option value="2">P2 — High</option>
+          <option value="3">P3 — Medium</option>
+          <option value="4">P4 — Low</option>
+          <option value="5">P5 — Someday</option>
+        </select>
+        <button id="btn-schedule" class="btn btn-ghost" style="font-size:12px;padding:5px 10px;">⚡ Auto-Schedule</button>
+      </div>
+    </div>
+    <div id="task-list" class="task-list">
+      <div class="empty">No tasks yet — add one above!</div>
+    </div>
+  </main>
+</div>
+
+<!-- ════════════════════════════════════════
+     PROFILE PANEL
+════════════════════════════════════════ -->
+<div id="profile-overlay" class="profile-overlay hidden" onclick="onOverlayClick(event)">
+  <div class="profile-panel">
+    <div class="profile-top">
+      <div class="profile-avatar-wrap">
+        <img id="p-avatar" src="" class="profile-big-avatar" alt=""
+          onerror="this.src='https://ui-avatars.com/api/?background=EFEEEB&color=6B6B6B&name=U&size=64'"/>
+        <label class="profile-edit-btn" title="Change photo">
+          ✎ <input type="file" id="inp-avatar" accept="image/*" style="display:none;"/>
+        </label>
+      </div>
+      <div class="profile-name"  id="p-name">—</div>
+      <div class="profile-email" id="p-email">—</div>
+      <span id="p-role" class="role-pill role-user">User</span>
+    </div>
+    <div class="profile-body">
+      <div class="profile-section">Edit Profile</div>
+      <div class="form-row">
+        <label class="form-label">Display Name</label>
+        <input type="text" id="p-inp-name"  class="notion-input" style="width:100%;" placeholder="Your name"/>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Job Title</label>
+        <input type="text" id="p-inp-title" class="notion-input" style="width:100%;" placeholder="e.g. Solutions Consultant"/>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Department</label>
+        <input type="text" id="p-inp-dept"  class="notion-input" style="width:100%;" placeholder="e.g. IT"/>
+      </div>
+      <button id="btn-save-profile" class="btn btn-black" style="width:100%;justify-content:center;margin-top:4px;">Save Changes</button>
+
+      <div class="profile-section">Work Schedule</div>
+      <div style="font-size:12px;color:var(--text-2);background:var(--bg-2);padding:10px 12px;border-radius:6px;line-height:1.9;">
+        Mon / Thu — 8:00 AM to 5:00 PM<br/>
+        Tue / Wed / Fri — 9:00 AM to 6:00 PM
+      </div>
+
+      <div class="profile-section">Account</div>
+      <!-- FIX: sign out goes to login, not dashboard -->
+      <button id="btn-logout" class="profile-logout">Sign Out</button>
     </div>
   </div>
+</div>
 
-  <!-- MAIN APP -->
-  <div id="app" class="app hidden">
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <span class="logo-icon">✦</span>
-        <span class="logo-text">Estreccella</span>
-      </div>
-      <nav class="sidebar-nav">
-        <a href="index.html" class="nav-item active"><span class="nav-icon">⊞</span> Dashboard</a>
-        <a href="pages/calendar.html" class="nav-item"><span class="nav-icon">◫</span> Calendar</a>
-        <a href="pages/projects.html" class="nav-item"><span class="nav-icon">◈</span> Projects & Timeline</a>
-        <a href="pages/sprint.html" class="nav-item"><span class="nav-icon">⚡</span> Sprint Board</a>
-        <a href="pages/meetings.html" class="nav-item"><span class="nav-icon">◎</span> Meetings</a>
-        <a href="pages/docs.html" class="nav-item"><span class="nav-icon">◻</span> Documents</a>
-      </nav>
-      <div class="sidebar-user">
-        <div class="user-avatar" id="user-avatar" title="Edit profile"></div>
-        <div class="user-info">
-          <div id="user-name" class="user-name">You</div>
-          <div id="user-email" class="user-email"></div>
-        </div>
-        <button id="reset-btn" class="logout-btn" title="Reset profile">↪</button>
-      </div>
-    </aside>
+<script type="module">
+import { initializeApp }        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+  createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc,
+  updateDoc, deleteDoc, query, where, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    <main class="main-content">
-      <div class="page-header">
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-sub" id="greeting">Good morning — here's your week at a glance.</p>
-      </div>
+/* ── CONFIG ──────────────────────────────────────────── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyDCvcPiEW9zMs2hJSRXtF5lYtUyCMoRIlE",
+  authDomain:        "estreccella.firebaseapp.com",
+  projectId:         "estreccella",
+  storageBucket:     "estreccella.firebasestorage.app",
+  messagingSenderId: "403183247546",
+  appId:             "1:403183247546:web:4764761e002cc1de602283"
+};
+const fireApp = initializeApp(firebaseConfig);
+const auth    = getAuth(fireApp);
+const db      = getFirestore(fireApp);
+const storage = getStorage(fireApp);
+const gProvider = new GoogleAuthProvider();
 
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Tasks</div></div>
-        <div class="stat-card"><div class="stat-num red" id="stat-overdue">0</div><div class="stat-label">Overdue</div></div>
-        <div class="stat-card"><div class="stat-num amber" id="stat-inprogress">0</div><div class="stat-label">In Progress</div></div>
-        <div class="stat-card"><div class="stat-num green" id="stat-done">0</div><div class="stat-label">Completed</div></div>
-      </div>
+let uid = null, userRole = "user", allTasks = [], isRegMode = false;
 
-      <div class="section">
-        <div class="section-header"><h2 class="section-title">Quick Add Task</h2></div>
-        <div class="quick-add">
-          <input type="text" id="task-title-input" class="input" placeholder="Task title..." />
-          <select id="task-priority" class="select">
-            <option value="1">🔴 P1 — Urgent</option>
-            <option value="2">🟠 P2 — High</option>
-            <option value="3" selected>🟡 P3 — Medium</option>
-            <option value="4">🟢 P4 — Low</option>
-            <option value="5">⚪ P5 — Someday</option>
-          </select>
-          <input type="number" id="task-hours" class="input small" placeholder="Hrs" min="0.5" step="0.5" value="1" />
-          <input type="date" id="task-due" class="input" />
-          <button id="add-task-btn" class="btn-primary">+ Add Task</button>
-        </div>
-      </div>
+const WORK = { 1:{s:8,e:17}, 2:{s:9,e:18}, 3:{s:9,e:18}, 4:{s:8,e:17}, 5:{s:9,e:18} };
 
-      <div class="section">
-        <div class="section-header">
-          <h2 class="section-title">All Tasks</h2>
-          <button id="auto-schedule-btn" class="btn-secondary">⚡ Auto-Schedule Week</button>
-        </div>
-        <div id="task-list" class="task-list">
-          <p class="empty-state">No tasks yet. Add one above!</p>
-        </div>
-      </div>
-    </main>
-  </div>
+/* ── GREETING ─────────────────────────────────────────── */
+const h = new Date().getHours();
+document.getElementById("greeting").textContent =
+  (h<12?"Good morning":h<17?"Good afternoon":"Good evening") + " — here's your week.";
 
-  <script type="module">
-    import { db, profile, showToast, renderUser, openProfileModal } from "./js/db.js";
+/* ════════════════════════════════════════════════════════
+   AUTH STATE
+════════════════════════════════════════════════════════ */
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    uid = user.uid;
+    await ensureUser(user);
+    const snap = await getDoc(doc(db,"users",uid));
+    const data = snap.exists() ? snap.data() : {};
 
-    const WORK_HOURS = { 1:{start:8,end:17}, 2:{start:9,end:18}, 3:{start:9,end:18}, 4:{start:8,end:17}, 5:{start:9,end:18} };
-
-    // ── Init ──────────────────────────────────────────────────
-    function init() {
-      const p = profile.get();
-      if (!p) {
-        document.getElementById("setup-screen").classList.remove("hidden");
-      } else {
-        showApp();
-      }
+    /* FIX: archived → sign out instantly, show login */
+    if (data.status === "archived") {
+      toast("Your account has been archived. Contact admin.");
+      await signOut(auth); return;
     }
 
-    function showApp() {
-      document.getElementById("setup-screen").classList.add("hidden");
-      document.getElementById("app").classList.remove("hidden");
-      const hour = new Date().getHours();
-      const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-      const p = profile.get();
-      document.getElementById("greeting").textContent = `${greet}, ${p?.name || ""}! Here's your week at a glance.`;
-      renderUser();
-      loadTasks();
-    }
+    userRole = data.role || "user";
+    showApp(user, data);
+    loadTasks();
+  } else {
+    /* FIX: sign out always shows login page, clears fields */
+    showLogin();
+  }
+});
 
-    // Setup
-    document.getElementById("setup-btn").onclick = () => {
-      const name = document.getElementById("setup-name").value.trim();
-      if (!name) { alert("Please enter your name"); return; }
-      profile.set({ name, role: document.getElementById("setup-role").value.trim() });
-      showApp();
-    };
-    document.getElementById("setup-name")?.addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("setup-btn").click(); });
+function showApp(user, data) {
+  document.getElementById("login-screen").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
 
-    // Reset / profile
-    document.getElementById("reset-btn").onclick = () => {
-      if (confirm("This will clear your profile (data stays). Continue?")) {
-        profile.clear();
-        window.location.reload();
-      }
-    };
-    document.getElementById("user-avatar").onclick = () => openProfileModal();
+  const name  = data.displayName || user.displayName || "User";
+  const photo = data.photoURL    || user.photoURL    || "";
+  const fallback = `https://ui-avatars.com/api/?background=EFEEEB&color=6B6B6B&name=${encodeURIComponent(name)}`;
 
-    // ── Tasks ─────────────────────────────────────────────────
-    function loadTasks() {
-      const tasks = db.getAll("tasks").sort((a, b) => a.priority - b.priority);
-      renderTasks(tasks);
-      updateStats(tasks);
-    }
+  // Sidebar
+  document.getElementById("s-avatar").src          = photo || fallback;
+  document.getElementById("s-name").textContent    = name;
+  document.getElementById("s-email").textContent   = user.email || "";
+  const rb = document.getElementById("s-role");
+  rb.textContent  = userRole === "admin" ? "Admin" : "User";
+  rb.className    = `role-pill ${userRole==="admin"?"role-admin":"role-user"}`;
+  if (userRole==="admin") document.getElementById("admin-nav").classList.remove("hidden");
 
-    function renderTasks(tasks) {
-      const list = document.getElementById("task-list");
-      if (!tasks.length) { list.innerHTML = '<p class="empty-state">No tasks yet. Add one above!</p>'; return; }
-      const now = new Date();
-      list.innerHTML = tasks.map(t => {
-        const overdue = t.dueDate && new Date(t.dueDate) < now && t.status !== "done";
-        const done    = t.status === "done";
-        const dueStr  = t.dueDate ? new Date(t.dueDate).toLocaleDateString("en-PH", { month: "short", day: "numeric" }) : "";
-        const sched   = t.scheduledStart
-          ? `📅 ${new Date(t.scheduledStart).toLocaleString("en-PH", { weekday:"short", month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" })}`
-          : "";
-        return `
-          <div class="task-item ${done ? "done" : ""}">
-            <div class="task-check ${done ? "checked" : ""}" onclick="toggleTask('${t.id}',${done})">${done ? "✓" : ""}</div>
-            <div class="task-name">${t.title}</div>
-            <div class="task-meta">
-              ${sched ? `<span class="task-scheduled">${sched}</span>` : ""}
-              <span class="priority-badge p${t.priority}">P${t.priority}</span>
-              ${dueStr ? `<span class="task-due ${overdue?"overdue":""}">${overdue?"⚠ ":""}${dueStr}</span>` : ""}
-              <span class="task-due">${t.estimatedHours||1}h</span>
-              <button class="btn-danger" onclick="deleteTask('${t.id}')">✕</button>
-            </div>
-          </div>`;
-      }).join("");
-    }
+  // Profile panel
+  document.getElementById("p-avatar").src          = photo || fallback;
+  document.getElementById("p-name").textContent    = name;
+  document.getElementById("p-email").textContent   = user.email || "";
+  const prb = document.getElementById("p-role");
+  prb.textContent = userRole==="admin"?"Admin":"User";
+  prb.className   = `role-pill ${userRole==="admin"?"role-admin":"role-user"}`;
+  document.getElementById("p-inp-name").value  = name;
+  document.getElementById("p-inp-title").value = data.jobTitle    || "";
+  document.getElementById("p-inp-dept").value  = data.department  || "";
+}
 
-    function updateStats(tasks) {
-      const now = new Date();
-      document.getElementById("stat-total").textContent      = tasks.length;
-      document.getElementById("stat-overdue").textContent    = tasks.filter(t => t.dueDate && new Date(t.dueDate) < now && t.status !== "done").length;
-      document.getElementById("stat-inprogress").textContent = tasks.filter(t => t.status === "inprogress").length;
-      document.getElementById("stat-done").textContent       = tasks.filter(t => t.status === "done").length;
-    }
+function showLogin() {
+  document.getElementById("login-screen").classList.remove("hidden");
+  document.getElementById("app").classList.add("hidden");
+  document.getElementById("profile-overlay").classList.add("hidden");
+  /* FIX: clear login fields so previous Google account doesn't pre-fill */
+  document.getElementById("inp-email").value = "";
+  document.getElementById("inp-pass").value  = "";
+  document.getElementById("inp-name") && (document.getElementById("inp-name").value = "");
+}
 
-    document.getElementById("add-task-btn").addEventListener("click", () => {
-      const title = document.getElementById("task-title-input").value.trim();
-      if (!title) { showToast("Please enter a task title"); return; }
-      db.add("tasks", {
-        title,
-        priority:       parseInt(document.getElementById("task-priority").value),
-        estimatedHours: parseFloat(document.getElementById("task-hours").value) || 1,
-        dueDate:        document.getElementById("task-due").value || null,
-        status:         "todo",
-        scheduledStart: null,
-        scheduledEnd:   null,
-      });
-      document.getElementById("task-title-input").value = "";
-      document.getElementById("task-hours").value = "1";
-      document.getElementById("task-due").value = "";
-      showToast("Task added!");
-      loadTasks();
+/* ── ENSURE USER DOC ─────────────────────────────────── */
+async function ensureUser(user) {
+  const ref2 = doc(db,"users",user.uid);
+  const snap = await getDoc(ref2);
+  if (!snap.exists()) {
+    /* FIX: role logic — first user ever = admin, rest = user
+       This applies equally to Google and email sign-ins */
+    const all  = await getDocs(collection(db,"users"));
+    const role = all.empty ? "admin" : "user";
+    await setDoc(ref2, {
+      uid:user.uid, displayName:user.displayName||"User",
+      email:user.email, photoURL:user.photoURL||"",
+      role, status:"active", jobTitle:"", department:"",
+      createdAt:serverTimestamp(), lastLogin:serverTimestamp(),
     });
+  } else {
+    await updateDoc(ref2, { lastLogin:serverTimestamp() });
+  }
+}
 
-    window.toggleTask = (id, isDone) => {
-      db.update("tasks", id, { status: isDone ? "todo" : "done" });
-      loadTasks();
-    };
+/* ── GOOGLE SIGN IN ──────────────────────────────────── */
+document.getElementById("btn-google").onclick = async () => {
+  try { await signInWithPopup(auth, gProvider); }
+  catch(e) { toast("Sign-in failed: " + e.message); }
+};
 
-    window.deleteTask = (id) => {
-      if (!confirm("Delete this task?")) return;
-      db.delete("tasks", id);
-      showToast("Deleted");
-      loadTasks();
-    };
+/* ── EMAIL AUTH ─────────────────────────────────────── */
+document.getElementById("toggle-link").onclick = () => {
+  isRegMode = !isRegMode;
+  document.getElementById("name-row").classList.toggle("hidden", !isRegMode);
+  document.getElementById("btn-email").textContent    = isRegMode ? "Create Account" : "Sign In";
+  document.getElementById("toggle-text").textContent  = isRegMode ? "Already have an account?" : "Don't have an account?";
+  document.getElementById("toggle-link").textContent  = isRegMode ? " Sign In" : " Register";
+};
 
-    // ── Auto-schedule ─────────────────────────────────────────
-    document.getElementById("auto-schedule-btn").addEventListener("click", () => {
-      const tasks = db.getAll("tasks", t => t.status !== "done").sort((a,b) => a.priority - b.priority);
-      const slots = buildWeekSlots();
-      let count = 0;
-      for (const t of tasks) {
-        const dur  = t.estimatedHours || 1;
-        const slot = findSlot(slots, dur);
-        if (slot) {
-          db.update("tasks", t.id, { scheduledStart: slot.start.toISOString(), scheduledEnd: slot.end.toISOString() });
-          occupySlot(slots, slot, dur);
-          count++;
-        }
-      }
-      showToast(`✓ Scheduled ${count} tasks for this week`);
-      loadTasks();
-    });
-
-    function getMonday(d) {
-      const day = d.getDay();
-      d.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
-      d.setHours(0, 0, 0, 0);
-      return d;
+async function doEmailAuth() {
+  const email = document.getElementById("inp-email").value.trim();
+  const pass  = document.getElementById("inp-pass").value.trim();
+  const name  = document.getElementById("inp-name")?.value.trim();
+  if (!email||!pass) { toast("Enter email and password"); return; }
+  try {
+    if (isRegMode) {
+      if (!name) { toast("Enter your full name"); return; }
+      const c = await createUserWithEmailAndPassword(auth,email,pass);
+      await updateProfile(c.user, { displayName:name });
+    } else {
+      await signInWithEmailAndPassword(auth,email,pass);
     }
+  } catch(e) {
+    const msg = e.code==="auth/user-not-found"       ? "No account with this email."
+              : e.code==="auth/wrong-password"        ? "Incorrect password."
+              : e.code==="auth/invalid-credential"    ? "Invalid email or password."
+              : e.code==="auth/email-already-in-use"  ? "Email already registered."
+              : e.code==="auth/weak-password"          ? "Password needs 6+ characters."
+              : e.message;
+    toast(msg);
+  }
+}
+document.getElementById("btn-email").onclick = doEmailAuth;
+/* FIX: Enter key triggers sign in */
+document.addEventListener("keydown", e => {
+  if (e.key==="Enter" && !document.getElementById("login-screen").classList.contains("hidden"))
+    doEmailAuth();
+});
 
-    function buildWeekSlots() {
-      const slots = {};
-      const mon = getMonday(new Date());
-      for (let d = 0; d < 5; d++) {
-        const day = new Date(mon);
-        day.setDate(day.getDate() + d);
-        const dow = day.getDay();
-        if (WORK_HOURS[dow]) {
-          const key = day.toISOString().split("T")[0];
-          slots[key] = { date: day, startHour: WORK_HOURS[dow].start, availableHours: WORK_HOURS[dow].end - WORK_HOURS[dow].start, occupied: [] };
-        }
-      }
-      return slots;
-    }
+/* ── SIGN OUT ────────────────────────────────────────── */
+/* FIX: sign out → shows login, not dashboard */
+document.getElementById("btn-logout").onclick = async () => {
+  await signOut(auth);
+  // showLogin is called by onAuthStateChanged
+};
 
-    function findSlot(slots, dur) {
-      for (const key of Object.keys(slots).sort()) {
-        const day  = slots[key];
-        const used = day.occupied.reduce((s, h) => s + h, 0);
-        if (day.availableHours - used >= dur) {
-          const start = new Date(day.date);
-          start.setHours(day.startHour + used, 0, 0, 0);
-          const end = new Date(start);
-          end.setHours(end.getHours() + Math.floor(dur));
-          end.setMinutes(end.getMinutes() + (dur % 1) * 60);
-          return { start, end, key };
-        }
-      }
-      return null;
-    }
+/* ── PROFILE PANEL ───────────────────────────────────── */
+/* FIX: clicking name/avatar on ALL pages opens panel */
+document.getElementById("profile-trigger").onclick = () => {
+  document.getElementById("profile-overlay").classList.remove("hidden");
+};
+window.onOverlayClick = e => {
+  if (e.target === document.getElementById("profile-overlay"))
+    document.getElementById("profile-overlay").classList.add("hidden");
+};
 
-    function occupySlot(slots, slot, dur) { slots[slot.key].occupied.push(dur); }
+document.getElementById("btn-save-profile").onclick = async () => {
+  const name  = document.getElementById("p-inp-name").value.trim();
+  const title = document.getElementById("p-inp-title").value.trim();
+  const dept  = document.getElementById("p-inp-dept").value.trim();
+  if (!name) { toast("Name cannot be empty"); return; }
+  await updateDoc(doc(db,"users",uid), { displayName:name, jobTitle:title, department:dept });
+  await updateProfile(auth.currentUser, { displayName:name });
+  document.getElementById("s-name").textContent = name;
+  document.getElementById("p-name").textContent = name;
+  toast("Profile saved!");
+};
 
-    init();
-  </script>
+document.getElementById("inp-avatar").onchange = async e => {
+  const file = e.target.files[0]; if (!file) return;
+  const r   = sRef(storage, `avatars/${uid}`);
+  await uploadBytes(r, file);
+  const url = await getDownloadURL(r);
+  await updateDoc(doc(db,"users",uid), { photoURL:url });
+  await updateProfile(auth.currentUser, { photoURL:url });
+  document.getElementById("s-avatar").src  = url;
+  document.getElementById("p-avatar").src  = url;
+  toast("Photo updated!");
+  e.target.value="";
+};
+
+/* ════════════════════════════════════════════════════════
+   TASKS
+════════════════════════════════════════════════════════ */
+async function loadTasks() {
+  try {
+    const q = query(collection(db,"tasks"), where("ownerId","==",uid), orderBy("priority","asc"));
+    const s = await getDocs(q);
+    allTasks = s.docs.map(d=>({id:d.id,...d.data()}));
+  } catch {
+    const s  = await getDocs(query(collection(db,"tasks"), where("ownerId","==",uid)));
+    allTasks = s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.priority||3)-(b.priority||3));
+  }
+  applyFilters();
+  updateStats();
+}
+
+/* FIX: filter + done tasks always sink to bottom */
+function applyFilters() {
+  const fs = document.getElementById("f-status").value;
+  const fp = document.getElementById("f-prio").value;
+  let list = [...allTasks];
+  if (fs) list = list.filter(t => t.status === fs);
+  if (fp) list = list.filter(t => String(t.priority) === fp);
+  list.sort((a,b) => {
+    const ad = a.status==="done"?1:0, bd = b.status==="done"?1:0;
+    if (ad!==bd) return ad-bd;
+    return (a.priority||3)-(b.priority||3);
+  });
+  renderTasks(list);
+}
+document.getElementById("f-status").onchange = applyFilters;
+document.getElementById("f-prio").onchange   = applyFilters;
+
+function renderTasks(tasks) {
+  const el  = document.getElementById("task-list");
+  if (!tasks.length) { el.innerHTML='<div class="empty">No tasks match your filter.</div>'; return; }
+  const now = new Date();
+  el.innerHTML = tasks.map(t => {
+    const done    = t.status === "done";
+    const overdue = t.dueDate && new Date(t.dueDate)<now && !done;
+    const dueStr  = t.dueDate ? new Date(t.dueDate).toLocaleDateString("en-PH",{month:"short",day:"numeric"}) : "";
+    const sched   = t.scheduledStart
+      ? new Date(t.scheduledStart).toLocaleString("en-PH",{weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})
+      : "";
+    return `<div class="task-row ${done?"done":""}">
+      <div class="task-check ${done?"checked":""}" onclick="toggleTask('${t.id}',${done})">${done?"✓":""}</div>
+      <div class="task-title">${t.title}</div>
+      <div class="task-meta">
+        ${sched?`<span class="task-sched">📅 ${sched}</span>`:""}
+        <span class="chip p${t.priority}">P${t.priority}</span>
+        ${dueStr?`<span class="task-due ${overdue?"overdue":""}">${overdue?"⚠ ":""}${dueStr}</span>`:""}
+        <span style="font-size:11px;color:var(--text-3);">${t.estimatedHours||1}h</span>
+        <button class="task-del" onclick="delTask('${t.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function updateStats() {
+  const now = new Date();
+  document.getElementById("st-total").textContent   = allTasks.length;
+  document.getElementById("st-overdue").textContent = allTasks.filter(t=>t.dueDate&&new Date(t.dueDate)<now&&t.status!=="done").length;
+  document.getElementById("st-inprog").textContent  = allTasks.filter(t=>t.status==="inprogress").length;
+  document.getElementById("st-done").textContent    = allTasks.filter(t=>t.status==="done").length;
+}
+
+document.getElementById("btn-add").onclick = async () => {
+  const title = document.getElementById("t-title").value.trim();
+  if (!title) { toast("Enter a task title"); return; }
+  await addDoc(collection(db,"tasks"), {
+    title, priority:parseInt(document.getElementById("t-prio").value),
+    estimatedHours:parseFloat(document.getElementById("t-hrs").value)||1,
+    dueDate:document.getElementById("t-due").value||null,
+    status:"todo", ownerId:uid, scheduledStart:null, scheduledEnd:null,
+    createdAt:serverTimestamp(),
+  });
+  document.getElementById("t-title").value="";
+  document.getElementById("t-hrs").value="1";
+  document.getElementById("t-due").value="";
+  toast("Task added!"); loadTasks();
+};
+
+window.toggleTask = async (id,isDone) => {
+  await updateDoc(doc(db,"tasks",id),{status:isDone?"todo":"done"});
+  loadTasks();
+};
+window.delTask = async id => {
+  if (!confirm("Delete this task?")) return;
+  await deleteDoc(doc(db,"tasks",id));
+  toast("Deleted"); loadTasks();
+};
+
+/* ── AUTO-SCHEDULE ───────────────────────────────────── */
+document.getElementById("btn-schedule").onclick = async () => {
+  const s = await getDocs(query(collection(db,"tasks"),where("ownerId","==",uid)));
+  const tasks = s.docs.map(d=>({id:d.id,...d.data()})).filter(t=>t.status!=="done").sort((a,b)=>(a.priority||3)-(b.priority||3));
+  const slots = buildSlots(); let n=0;
+  for (const t of tasks) {
+    const dur=t.estimatedHours||1, slot=findSlot(slots,dur);
+    if (slot) { await updateDoc(doc(db,"tasks",t.id),{scheduledStart:slot.s.toISOString(),scheduledEnd:slot.e.toISOString()}); occupy(slots,slot,dur); n++; }
+  }
+  toast(`✓ Scheduled ${n} tasks`); loadTasks();
+};
+function buildSlots() {
+  const slots={}, mon=monday(new Date());
+  for(let d=0;d<5;d++){const day=new Date(mon);day.setDate(day.getDate()+d);const w=day.getDay();if(WORK[w]){const k=day.toISOString().split("T")[0];slots[k]={date:day,sh:WORK[w].s,avail:WORK[w].e-WORK[w].s,occ:[]};}}
+  return slots;
+}
+function findSlot(slots,dur){for(const k of Object.keys(slots).sort()){const d=slots[k],used=d.occ.reduce((a,b)=>a+b,0);if(d.avail-used>=dur){const s=new Date(d.date);s.setHours(d.sh+used,0,0,0);const e=new Date(s);e.setHours(e.getHours()+Math.floor(dur));e.setMinutes(e.getMinutes()+(dur%1)*60);return{s,e,k};}}return null;}
+function occupy(slots,slot,dur){slots[slot.k].occ.push(dur);}
+function monday(d){const day=d.getDay();d.setDate(d.getDate()-day+(day===0?-6:1));d.setHours(0,0,0,0);return d;}
+
+/* ── TOAST ───────────────────────────────────────────── */
+function toast(msg){
+  let t=document.querySelector(".toast");
+  if(!t){t=document.createElement("div");t.className="toast";document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);
+}
+</script>
 </body>
 </html>
